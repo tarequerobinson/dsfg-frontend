@@ -19,7 +19,8 @@ const nextConfig = {
       'jamaica-gleaner.com',
       'www.jamaica-gleaner.com',
       'jamaicaobserver.com',
-      'www.jamaicaobserver.com'
+      'www.jamaicaobserver.com',
+      'www.jamstockex.com'
     ],
 
   },
