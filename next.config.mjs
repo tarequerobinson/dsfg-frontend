@@ -15,7 +15,16 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    domains: [
+      'jamaica-gleaner.com',
+      'www.jamaica-gleaner.com',
+      'jamaicaobserver.com',
+      'www.jamaicaobserver.com'
+    ],
+
   },
+
+
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,

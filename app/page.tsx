@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, BarChart2, Lock, DollarSign } from "lucide-react"
+import { ArrowRight, BarChart2, Lock, DollarSign, BookOpen } from "lucide-react"
 
 export default function LandingPage() {
   return (
@@ -11,6 +11,11 @@ export default function LandingPage() {
             <span className="ml-2 text-2xl font-bold text-gray-900">DSFG</span>
           </div>
           <div>
+          <Link href="/resources" className="text-gray-500 hover:text-gray-900 mr-4 flex items-center">
+              <BookOpen className="h-4 w-4 mr-1" />
+              Resources
+            </Link>
+
             <Link href="/signin" className="text-gray-500 hover:text-gray-900 mr-4">
               Sign In
             </Link>
