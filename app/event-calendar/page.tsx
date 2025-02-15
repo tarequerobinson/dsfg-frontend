@@ -25,6 +25,7 @@ export default function BusinessCalendar() {
   const [events, setEvents] = useState<RssEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [listViewMode, setListViewMode] = useState<"month" | "all">("all")
 
   useEffect(() => {
     async function fetchEvents() {
@@ -126,9 +127,15 @@ export default function BusinessCalendar() {
   }
 
   const getFilteredEvents = () => {
-    return events
-      .filter((event) => isSameMonth(event.eventDate, currentMonth))
-      .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
+    if (listViewMode === "month") {
+      return events
+        .filter((event) => isSameMonth(event.eventDate, currentMonth))
+        .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
+    } else {
+      return events
+        .filter((event) => event.eventDate >= new Date())
+        .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
+    }
   }
 
   const navigateMonth = (direction: number) => {
@@ -197,10 +204,7 @@ export default function BusinessCalendar() {
           <div
             key={date.toString()}
             className={`min-h-24 p-2 border rounded-lg border-neutral-200 
-              ${isSameMonth(date, currentMonth) 
-                ? "bg-white dark:bg-neutral-900" 
-                : "bg-neutral-50 dark:bg-neutral-950"
-              } 
+              ${isSameMonth(date, currentMonth) ? "bg-white dark:bg-neutral-900" : "bg-neutral-50 dark:bg-neutral-950"} 
               ${isToday ? "ring-2 ring-blue-500" : ""}
               dark:border-neutral-800`}
             style={{ gridColumnStart: index === 0 ? date.getDay() + 1 : "auto" }}
@@ -231,11 +235,19 @@ export default function BusinessCalendar() {
     const groupedEvents = {
       upcoming: events.filter((event) => event.eventDate > today),
       today: events.filter((event) => isSameDay(event.eventDate, today)),
-      past: events.filter((event) => event.eventDate < today),
+      past: events.filter((event) => event.eventDate < today && listViewMode === "month"),
     }
 
     return (
       <div className="space-y-6">
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setListViewMode(listViewMode === "month" ? "all" : "month")}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            {listViewMode === "month" ? "Show All Upcoming" : "Show Current Month Only"}
+          </button>
+        </div>
         {Object.entries(groupedEvents).map(
           ([status, statusEvents]) =>
             statusEvents.length > 0 && (
@@ -289,13 +301,20 @@ export default function BusinessCalendar() {
     <Card className="max-w-6xl mx-auto">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl font-bold">JSE Business Calendar</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            JSE Business Calendar
+            {!isCalendarView && (
+              <span className="text-sm font-normal ml-2">
+                ({listViewMode === "month" ? "Current Month" : "All Upcoming"})
+              </span>
+            )}
+          </CardTitle>
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleAlerts}
               className={`p-2 rounded-full ${
-                alertsEnabled 
-                  ? "bg-blue-100 text-blue-900 dark:bg-blue-400 dark:text-blue-950" 
+                alertsEnabled
+                  ? "bg-blue-100 text-blue-900 dark:bg-blue-400 dark:text-blue-950"
                   : "hover:bg-neutral-100 dark:hover:bg-neutral-800"
               }`}
               title={alertsEnabled ? "Disable alerts" : "Enable alerts"}
@@ -354,3 +373,4 @@ export default function BusinessCalendar() {
     </Card>
   )
 }
+

@@ -17,6 +17,11 @@ import {
   Filter,
   Moon,
   Sun,
+  Percent,
+  CreditCard,
+  Home,
+  Car,
+  BookOpen,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +29,17 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import DarkModeToggle from "@/components/DarkModeToggle"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+// import { useTheme } from "@/contexts/ThemeContext"
 
 interface ResourceItem {
   title: string
@@ -31,6 +47,9 @@ interface ResourceItem {
   type: "general" | "video" | "book" | "brokerage" | "term" | "twitter" | "course"
   url?: string
 }
+
+// const { darkMode } = useTheme()
+
 
 const resourceItems: ResourceItem[] = [
   // General
@@ -231,8 +250,90 @@ const resourceItems: ResourceItem[] = [
     type: "course",
     url: "https://www.jamaicantechnicalanalysis.com",
   },
-]
 
+  {
+    title: "NCB High Yield Savings Account",
+    content: "Offers one of the highest interest rates for savings accounts in Jamaica at 2.5% per annum.",
+    type: "savings",
+    url: "https://www.jncb.com/personal-banking/accounts/savings-accounts/high-yield-savings-account",
+  },
+  {
+    title: "Sagicor Bank Premium Savings Account",
+    content: "Provides a competitive interest rate of 2.3% per annum on savings.",
+    type: "savings",
+    url: "https://www.sagicorjamaica.com/personal/banking/savings-accounts/premium-savings-account",
+  },
+
+  // New items for brokerage accounts
+  {
+    title: "JMMB Group Easy Start Investment Account",
+    content: "Start investing with as little as JMD 1,000. No minimum balance required.",
+    type: "brokerage",
+    url: "https://jm.jmmb.com/investments/easy-start-investment-account",
+  },
+  {
+    title: "Barita Investments Starter Account",
+    content: "Begin your investment journey with a minimum of JMD 2,000.",
+    type: "brokerage",
+    url: "https://www.barita.com/products-services/individual-investors/starter-account/",
+  },
+
+  // New items for bank fees
+  {
+    title: "Scotiabank Low Fee Banking Package",
+    content: "Offers one of the lowest monthly maintenance fees at JMD 385 per month.",
+    type: "fees",
+    url: "https://jm.scotiabank.com/personal/bank-accounts/savings-accounts/scotia-one-account.html",
+  },
+  {
+    title: "First Global Bank Basic Savings Account",
+    content: "No monthly maintenance fee for basic savings account.",
+    type: "fees",
+    url: "https://www.firstglobal-bank.com/personal-banking/accounts/savings-accounts/",
+  },
+
+  // New items for mortgage rates
+  {
+    title: "Jamaica National Building Society Mortgage",
+    content: "Offers competitive mortgage rates starting from 6.5% per annum.",
+    type: "mortgage",
+    url: "https://www.jnbank.com/personal-banking/loans/mortgages/",
+  },
+  {
+    title: "Victoria Mutual Building Society Home Loans",
+    content: "Provides mortgage rates as low as 6.75% per annum for qualified borrowers.",
+    type: "mortgage",
+    url: "https://www.vmbs.com/loans/mortgages/",
+  },
+
+  // New items for car loan rates
+  {
+    title: "NCB Auto Loan",
+    content: "Competitive car loan rates starting from 7.5% per annum.",
+    type: "car-loan",
+    url: "https://www.jncb.com/personal-banking/loans/auto-loans",
+  },
+  {
+    title: "JMMB Bank Auto Loan",
+    content: "Offers car loan rates from 7.75% per annum with flexible terms.",
+    type: "car-loan",
+    url: "https://jm.jmmb.com/personal/loans/auto-loans",
+  },
+
+  // New items for unsecured loan rates
+  {
+    title: "Sagicor Bank Unsecured Loan",
+    content: "Provides unsecured personal loans with rates starting from 15% per annum.",
+    type: "unsecured-loan",
+    url: "https://www.sagicorjamaica.com/personal/loans/unsecured-loans",
+  },
+  {
+    title: "First Global Bank FastCash Loan",
+    content: "Offers unsecured loans with rates from 16% per annum and quick approval.",
+    type: "unsecured-loan",
+    url: "https://www.firstglobal-bank.com/personal-banking/loans/unsecured-loans/",
+  },
+]
 
 const categories = [
   { name: "All", type: "all" },
@@ -243,14 +344,116 @@ const categories = [
   { name: "Terms", type: "term" },
   { name: "Twitter", type: "twitter" },
   { name: "Courses", type: "course" },
+  { name: "Savings Accounts", type: "savings" },
+  { name: "Bank Fees", type: "fees" },
+  { name: "Mortgages", type: "mortgage" },
+  { name: "Car Loans", type: "car-loan" },
+  { name: "Unsecured Loans", type: "unsecured-loan" },
 ]
+
+interface CategoryButtonProps {
+  category: { name: string; type: string }
+  isActive: boolean
+  onClick: () => void
+}
+
+const PaginationControls = ({ currentPage, totalPages, onPageChange }: { 
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void 
+}) => {
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 7;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      
+      if (currentPage <= 3) {
+        for (let i = 2; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push('ellipsis');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push('ellipsis');
+        pages.push(currentPage - 1);
+        pages.push(currentPage);
+        pages.push(currentPage + 1);
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  if (totalPages <= 1) return null;
+
+  return (
+    <Pagination className="mt-8">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious 
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage > 1) onPageChange(currentPage - 1);
+            }}
+            className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+          />
+        </PaginationItem>
+        
+        {getPageNumbers().map((page, i) => (
+          <PaginationItem key={i}>
+            {page === 'ellipsis' ? (
+              <PaginationEllipsis />
+            ) : (
+              <PaginationLink
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onPageChange(page as number);
+                }}
+                isActive={page === currentPage}
+              >
+                {page}
+              </PaginationLink>
+            )}
+          </PaginationItem>
+        ))}
+
+        <PaginationItem>
+          <PaginationNext
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage < totalPages) onPageChange(currentPage + 1);
+            }}
+            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+};
 
 export default function ResourcesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredItems, setFilteredItems] = useState(resourceItems)
   const [selectedType, setSelectedType] = useState<string>("all")
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 6
 
   useEffect(() => {
     const filtered = resourceItems.filter(
@@ -260,15 +463,11 @@ export default function ResourcesPage() {
         (selectedType === "all" || item.type === selectedType),
     )
     setFilteredItems(filtered)
+    setCurrentPage(1)
   }, [searchTerm, selectedType])
 
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark")
-    } else {
-      document.documentElement.classList.remove("dark")
-    }
-  }, [isDarkMode])
+  const pageCount = Math.ceil(filteredItems.length / itemsPerPage)
+  const currentItems = filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   const renderIcon = (type: string) => {
     const iconClass = "h-5 w-5"
@@ -285,24 +484,34 @@ export default function ResourcesPage() {
         return <GraduationCap className={`${iconClass} text-green-600 dark:text-neutral-400`} />
       case "term":
         return <MoneyIcon className={`${iconClass} text-yellow-600 dark:text-neutral-400`} />
+      case "savings":
+        return <Percent className={`${iconClass} text-emerald-600 dark:text-neutral-400`} />
+      case "fees":
+        return <CreditCard className={`${iconClass} text-orange-600 dark:text-neutral-400`} />
+      case "mortgage":
+        return <Home className={`${iconClass} text-indigo-600 dark:text-neutral-400`} />
+      case "car-loan":
+        return <Car className={`${iconClass} text-cyan-600 dark:text-neutral-400`} />
+      case "unsecured-loan":
+        return <DollarSign className={`${iconClass} text-pink-600 dark:text-neutral-400`} />
       default:
         return <DollarSign className={`${iconClass} text-emerald-600 dark:text-neutral-400`} />
     }
   }
 
-  const CategoryButton = ({ category, isActive, onClick }) => (
+  const CategoryButton = ({ category, isActive, onClick }: CategoryButtonProps) => (
     <Button
       variant={isActive ? "default" : "ghost"}
       size="sm"
       onClick={onClick}
-      className={`justify-start ${isActive ? 'dark:bg-dark-surface dark:text-dark-text' : ''}`}
+      className={`justify-start ${isActive ? "dark:bg-dark-surface dark:text-dark-text" : ""}`}
     >
       {renderIcon(category.type)}
       <span className="ml-2">{category.name}</span>
     </Button>
   )
 
-  const ResourceCard = ({ item }) => (
+  const ResourceCard = ({ item }: { item: ResourceItem }) => (
     <motion.div
       layout
       initial={{ opacity: 0, y: 20 }}
@@ -317,7 +526,8 @@ export default function ResourcesPage() {
             <span>{item.title}</span>
           </CardTitle>
           <CardDescription className="dark:text-neutral-400">
-            {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+            {categories.find((c) => c.type === item.type)?.name ||
+              item.type.charAt(0).toUpperCase() + item.type.slice(1)}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -344,8 +554,8 @@ export default function ResourcesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <DollarSign className="h-8 w-8 text-green-600 dark:text-neutral-400" />
-              <h1 className="text-xl font-bold text-neutral-900 dark:text-dark-text">JA Finance Resources</h1>
+              <BookOpen className="h-8 w-8 text-green-600 dark:text-neutral-400" />
+              <h1 className="text-xl font-bold text-neutral-900 dark:text-dark-text">Resources</h1>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -359,14 +569,8 @@ export default function ResourcesPage() {
                 />
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-neutral-400 dark:text-neutral-400" />
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-              >
-                {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
+              <DarkModeToggle />
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -436,15 +640,15 @@ export default function ResourcesPage() {
             </div>
 
             <Tabs defaultValue="grid" className="mb-6">
-              <TabsList className="dark:bg-dark-surface dark:border-dark-border">
-                <TabsTrigger 
-                  value="grid" 
+            <TabsList className="dark:bg-dark-surface dark:border-dark-border">
+                <TabsTrigger
+                  value="grid"
                   className="dark:data-[state=active]:bg-dark-surface dark:data-[state=active]:text-dark-text"
                 >
                   Grid View
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="list" 
+                <TabsTrigger
+                  value="list"
                   className="dark:data-[state=active]:bg-dark-surface dark:data-[state=active]:text-dark-text"
                 >
                   List View
@@ -453,7 +657,7 @@ export default function ResourcesPage() {
               <TabsContent value="grid">
                 <AnimatePresence>
                   <motion.div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" layout>
-                    {filteredItems.map((item, index) => (
+                    {currentItems.map((item, index) => (
                       <ResourceCard key={index} item={item} />
                     ))}
                   </motion.div>
@@ -462,7 +666,7 @@ export default function ResourcesPage() {
               <TabsContent value="list">
                 <AnimatePresence>
                   <motion.div className="space-y-4" layout>
-                    {filteredItems.map((item, index) => (
+                    {currentItems.map((item, index) => (
                       <ResourceCard key={index} item={item} />
                     ))}
                   </motion.div>
@@ -470,7 +674,7 @@ export default function ResourcesPage() {
               </TabsContent>
             </Tabs>
 
-            {filteredItems.length === 0 && (
+            {filteredItems.length === 0 ? (
               <div className="text-center py-12">
                 <Search className="mx-auto h-12 w-12 text-neutral-400 dark:text-neutral-400" />
                 <h3 className="mt-4 text-lg font-medium text-neutral-900 dark:text-dark-text">No resources found</h3>
@@ -487,6 +691,14 @@ export default function ResourcesPage() {
                   Clear all filters
                 </Button>
               </div>
+            ) : (
+              pageCount > 1 && (
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={pageCount}
+                  onPageChange={setCurrentPage}
+                />
+              )
             )}
           </div>
         </main>

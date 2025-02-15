@@ -30,35 +30,38 @@ export default function Dashboard() {
     assets: true
   })
 
+  // Mock client portfolio data - replace with real data source
+  const [clientPortfolio] = useState({
+    realEstateValue: 123, // if this value is 0 then we assume you are not a home owner and prompt you to find out how to become one 
+    stockValue: 0, //if this value is 0 then we assume you have not started investing in stocks and prompt you on howo to get started 
+    totalAssets: 900000,
+    liabilities: 75000
+  })
+
   const pages = [
     {
       title: "Financial Overview",
       content: (
         <div className="space-y-6">
-          {/* Portfolio Summary */}
           <div className="text-center mb-6">
             <PortfolioSummary />
           </div>
-
-          {/* Quick Stats Grid */}
           <div className="grid grid-cols-2 gap-4">
             <AssetCard 
               title="Total Assets" 
-              value="$900,000" 
+              value={`$${clientPortfolio.totalAssets.toLocaleString()}`} 
               change="+2.4%"
               icon={CurrencyDollarIcon}
               color="text-green-500"
             />
             <AssetCard 
               title="Liabilities" 
-              value="-$75,000" 
+              value={`-$${Math.abs(clientPortfolio.liabilities).toLocaleString()}`} 
               change="-0.8%"
               icon={ScaleIcon}
               color="text-red-500"
             />
           </div>
-
-          {/* Mini Chart */}
           <div className="bg-white dark:bg-dark-surface p-4 rounded-xl">
             <AssetChart darkMode={darkMode} simplified />
           </div>
@@ -70,20 +73,39 @@ export default function Dashboard() {
       content: (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <AssetCard 
-              title="Real Estate" 
-              value="$500,000" 
-              change="+2.5%"
-              icon={HomeIcon}
-              color="text-blue-500"
-            />
-            <AssetCard 
-              title="Investments" 
-              value="$250,000" 
-              change="+3.7%"
-              icon={ChartBarIcon}
-              color="text-purple-500"
-            />
+            {clientPortfolio.realEstateValue > 0 ? (
+              <AssetCard 
+                title="Real Estate" 
+                value={`$${clientPortfolio.realEstateValue.toLocaleString()}`} 
+                change="+2.5%"
+                icon={HomeIcon}
+                color="text-blue-500"
+              />
+            ) : (
+              <div className="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-200">
+                  We notice you may not yet be a homeowner. Here are some tips on becoming a home owner: 
+                  <a href="/home-ownership-guide" className="ml-1 text-yellow-600 dark:text-yellow-300 underline">Learn more</a>
+                </p>
+              </div>
+            )}
+
+            {clientPortfolio.stockValue > 0 ? (
+              <AssetCard 
+                title="Investments" 
+                value={`$${clientPortfolio.stockValue.toLocaleString()}`} 
+                change="+3.7%"
+                icon={ChartBarIcon}
+                color="text-purple-500"
+              />
+            ) : (
+              <div className="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 dark:border-blue-600 p-4 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-200">
+                  We notice you may not be investing in stocks. Here's how to get started with your stock portfolio:
+                  <a href="/investing-guide" className="ml-1 text-blue-600 dark:text-blue-300 underline">Get started</a>
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="bg-white dark:bg-dark-surface p-4 rounded-xl">
@@ -103,6 +125,7 @@ export default function Dashboard() {
     }
   ]
 
+  // Rest of the component remains the same...
   return (
     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       {/* Header with Pagination */}

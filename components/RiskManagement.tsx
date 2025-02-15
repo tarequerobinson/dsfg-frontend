@@ -6,7 +6,7 @@ const RiskManagement = () => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-white shadow rounded-lg p-6 dark:bg-dark-surface" >
       <h2 className="text-2xl font-bold mb-4">Risk Assessment</h2>
       <p className="mb-2">
         Overall Risk: <span className="font-semibold">{riskAssessment.overallRisk}</span>
