@@ -234,7 +234,7 @@ const NewsAggregator = () => {
     <Card className="max-w-4xl mx-auto bg-white dark:bg-dark-bg border-neutral-200 dark:border-dark-border">
       <CardHeader className="space-y-6">
         <CardTitle className="text-2xl font-bold text-neutral-900 dark:text-dark-text">
-          Jamaica News Aggregator
+          Business News (Jamaica)
         </CardTitle>
 
         <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
@@ -284,7 +284,7 @@ const NewsAggregator = () => {
               <div className="p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg border border-neutral-200 dark:border-dark-border">
                 <h3 className="text-lg font-semibold mb-2 flex items-center text-neutral-900 dark:text-dark-text">
                   <ChartBarIcon className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
-                  AI News Summary
+                  News Summary
                   {summaryLoading && (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 dark:border-blue-400 ml-2" />
                   )}

@@ -11,20 +11,16 @@ import {
   User,
   Newspaper,
   AlertTriangle,
-  Upload,
   FileText,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   Wallet,
   LineChart,
-  Banknote,
   LandPlot,
   Calendar,
   Scale
 } from "lucide-react"
-
-
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -86,19 +82,15 @@ const Sidebar = () => {
       ]
     },
     { href: "/bonds", icon: Briefcase, label: "Bonds" },
-    { href: "/treasury-bills", icon: Banknote, label: "Treasury Bills" },
     { href: "/stocks", icon: LineChart, label: "Stocks" }
   ]
 
   const otherMenuItems = [
-    { href: "/update-networth", icon: Scale,       label: "Update Net Worth",       badge: "Live" },
+    { href: "/update-networth", icon: Scale, label: "Update Net Worth", badge: "Live" },
     { href: "/news", icon: Newspaper, label: "News" },
     { href: "/event-calendar", icon: Calendar, label: "Events" },
-
     { href: "/profile", icon: User, label: "Profile" },
-
-    { href: "/risk-assessment", icon: AlertTriangle, label: "Risk Assessment"
-    },
+    { href: "/risk-assessment", icon: AlertTriangle, label: "Risk Assessment" },
     { href: "/financial-summarizer", icon: FileText, label: "Summarizer" }
   ]
 
@@ -107,18 +99,21 @@ const Sidebar = () => {
       initial="expanded"
       animate={isCollapsed ? "collapsed" : "expanded"}
       variants={sidebarVariants}
-      className="bg-green-700 dark:bg-dark-surface-2 text-white h-full flex flex-col relative z-50 shadow-xl"
+      className="bg-white dark:bg-neutral-900 h-full flex flex-col relative z-50 shadow-xl"
     >
       {/* Logo Section */}
-      <div className="flex items-center justify-center py-6 px-2">
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 opacity-10"></div>
         <Link
           href="/dashboard"
-          className="flex items-center p-2 rounded hover:bg-green-600 dark:hover:bg-dark-surface transition-colors"
+          className="relative flex items-center justify-center py-8 px-2"
         >
-          <DollarSign className="h-8 w-8 flex-shrink-0" />
+          <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-3 rounded-xl">
+            <DollarSign className="h-6 w-6 flex-shrink-0 text-white" />
+          </div>
           <motion.span
             variants={textVariants}
-            className="text-2xl font-extrabold overflow-hidden"
+            className="text-2xl font-extrabold overflow-hidden bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent ml-3"
           >
             DSFG
           </motion.span>
@@ -126,23 +121,25 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 overflow-y-auto pb-4">
+      <nav className="flex-1 overflow-y-auto pb-4 px-3">
         {/* Portfolio Section */}
-        <div className="px-2">
+        <div className="mt-6">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsPortfolioExpanded(!isPortfolioExpanded)}
-            className="w-full flex items-center p-2 rounded hover:bg-green-600 dark:hover:bg-dark-surface transition-colors"
+            className="w-full flex items-center p-2.5 rounded-lg bg-gradient-to-r from-emerald-400/10 to-blue-500/10 hover:from-emerald-400/20 hover:to-blue-500/20 transition-colors"
           >
-            <Wallet className="flex-shrink-0" size={20} />
-            <motion.span variants={textVariants} className="overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-2 rounded-lg">
+              <Wallet className="flex-shrink-0 text-white" size={16} />
+            </div>
+            <motion.span variants={textVariants} className="overflow-hidden font-medium text-neutral-700 dark:text-neutral-200">
               Portfolio
             </motion.span>
             <motion.span variants={textVariants} className="ml-auto">
               <ChevronDown
                 size={16}
-                className={`transform transition-transform ${
+                className={`transform transition-transform text-neutral-500 ${
                   isPortfolioExpanded ? "rotate-180" : ""
                 }`}
               />
@@ -156,33 +153,32 @@ const Sidebar = () => {
                 animate="expanded"
                 exit="collapsed"
                 variants={portfolioVariants}
-                className="ml-2 border-l-2 border-green-600/20"
+                className="ml-2 mt-2 space-y-1"
               >
                 {portfolioItems.map((item, index) => (
                   <motion.div
                     key={index}
                     variants={itemVariants}
-                    className="pl-2"
                   >
                     <Link
                       href={item.href}
-                      className="flex items-center p-2 rounded hover:bg-green-600 dark:hover:bg-dark-surface transition-colors"
+                      className="flex items-center p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-colors"
                     >
-                      <item.icon className="flex-shrink-0" size={18} />
-                      <motion.span variants={textVariants} className="overflow-hidden">
+                      <item.icon className="flex-shrink-0 text-neutral-500" size={16} />
+                      <motion.span variants={textVariants} className="overflow-hidden text-neutral-700 dark:text-neutral-300">
                         {item.label}
                       </motion.span>
                     </Link>
                     {item.subItems && (
-                      <div className="ml-2">
+                      <div className="ml-4 mt-1 space-y-1">
                         {item.subItems.map((subItem, subIndex) => (
                           <Link
                             key={subIndex}
                             href={subItem.href}
-                            className="flex items-center p-2 text-sm rounded hover:bg-green-600 dark:hover:bg-dark-surface transition-colors"
+                            className="flex items-center p-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-colors"
                           >
-                            <subItem.icon className="flex-shrink-0" size={16} />
-                            <motion.span variants={textVariants} className="overflow-hidden">
+                            <subItem.icon className="flex-shrink-0 text-neutral-400" size={14} />
+                            <motion.span variants={textVariants} className="overflow-hidden text-neutral-600 dark:text-neutral-400">
                               {subItem.label}
                             </motion.span>
                           </Link>
@@ -197,42 +193,42 @@ const Sidebar = () => {
         </div>
 
         {/* Other Menu Items */}
-        <div className="px-2 mt-4 space-y-1">
-    {otherMenuItems.map((item, index) => (
-      <Link
-        key={index}
-        href={item.href}
-        className="flex items-center p-2 rounded hover:bg-green-600 dark:hover:bg-dark-surface transition-colors"
-      >
-        <item.icon className="flex-shrink-0" size={20} />
-        <motion.span variants={textVariants} className="overflow-hidden flex-1">
-          {item.label}
-        </motion.span>
-        {item.badge && (
-          <motion.span 
-            variants={textVariants}
-            className="ml-2 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-medium px-2 py-0.5 rounded-full"
-          >
-            {item.badge}
-          </motion.span>
-        )}
-      </Link>
-    ))}
-  </div>
+        <div className="mt-6 space-y-1">
+          {otherMenuItems.map((item, index) => (
+            <Link
+              key={index}
+              href={item.href}
+              className="flex items-center p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-colors"
+            >
+              <item.icon className="flex-shrink-0 text-neutral-500" size={16} />
+              <motion.span variants={textVariants} className="overflow-hidden flex-1 text-neutral-700 dark:text-neutral-300">
+                {item.label}
+              </motion.span>
+              {item.badge && (
+                <motion.span 
+                  variants={textVariants}
+                  className="ml-2 bg-gradient-to-r from-emerald-400 to-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded-full"
+                >
+                  {item.badge}
+                </motion.span>
+              )}
+            </Link>
+          ))}
+        </div>
       </nav>
 
       {/* Collapse Button */}
-      <div className="p-2 border-t border-green-800/30">
+      <div className="p-3">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="w-full flex items-center justify-center p-2 rounded hover:bg-green-600 dark:hover:bg-dark-surface transition-colors"
+          className="w-full flex items-center justify-center p-2.5 rounded-lg bg-gradient-to-r from-emerald-400/10 to-blue-500/10 hover:from-emerald-400/20 hover:to-blue-500/20 transition-colors"
         >
           {isCollapsed ? (
-            <ChevronRight size={20} />
+            <ChevronRight size={16} className="text-neutral-500" />
           ) : (
-            <ChevronLeft size={20} />
+            <ChevronLeft size={16} className="text-neutral-500" />
           )}
         </motion.button>
       </div>

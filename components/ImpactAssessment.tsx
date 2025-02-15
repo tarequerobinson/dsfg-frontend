@@ -6,7 +6,7 @@ const ImpactAssessment = () => {
   ]
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-white shadow rounded-lg p-6 dark:bg-dark-surface">
       <h2 className="text-2xl font-bold mb-4">Current Affairs Impact</h2>
       <table className="min-w-full">
         <thead>

@@ -19,7 +19,7 @@ const PortfolioUpload = () => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-white shadow rounded-lg p-6 dark:bg-dark-surface">
       <h2 className="text-2xl font-bold mb-4">Upload Portfolio</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

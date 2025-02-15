@@ -107,7 +107,7 @@ export default function Dashboard() {
     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       {/* Header with Pagination */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-text">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
           {pages[currentPage].title}
         </h1>
         <div className="flex items-center gap-2">
@@ -155,7 +155,7 @@ export default function Dashboard() {
             onClick={() => setCurrentPage(index)}
             className={`w-3 h-3 rounded-full ${
               currentPage === index 
-                ? "bg-green-500" 
+                ? "bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent" 
                 : "bg-gray-300 dark:bg-dark-border"
             }`}
           />

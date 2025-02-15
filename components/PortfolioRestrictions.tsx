@@ -14,7 +14,7 @@ const PortfolioRestrictions = () => {
   ]
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-white shadow rounded-lg p-6 dark:bg-dark-surface">
       <h2 className="text-2xl font-bold mb-4">Portfolio Restrictions</h2>
       <ul className="space-y-4">
         {restrictions.map((item, index) => (

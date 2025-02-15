@@ -20,8 +20,8 @@ const StockTable: React.FC<StockTableProps> = ({ stocks, institution }) => {
 
   return (
     <div className="overflow-x-auto">
-      <table className={`min-w-full divide-y divide-gray-200 ${darkMode ? "text-gray-200" : "text-gray-700"}`}>
-        <thead className={darkMode ? "bg-gray-800" : "bg-gray-50"}>
+      <table className={`min-w-full divide-y divide-neutral-200 ${darkMode ? "text-neutral-200" : "text-neutral-700"}`}>
+        <thead className={darkMode ? "bg-neutral-900" : "bg-neutral-50"}>
           <tr>
             {institution && (
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
@@ -48,9 +48,9 @@ const StockTable: React.FC<StockTableProps> = ({ stocks, institution }) => {
             </th>
           </tr>
         </thead>
-        <tbody className={`divide-y divide-gray-200 ${darkMode ? "bg-gray-700" : "bg-white"}`}>
+        <tbody className={`divide-y divide-neutral-200 ${darkMode ? "bg-neutral-800" : "bg-white"}`}>
           {stocks.map((stock, index) => (
-            <tr key={index} className={index % 2 === 0 ? (darkMode ? "bg-gray-800" : "bg-gray-50") : ""}>
+            <tr key={index} className={index % 2 === 0 ? (darkMode ? "bg-neutral-900" : "bg-neutral-50") : ""}>
               {institution && <td className="px-6 py-4 whitespace-nowrap text-sm">{institution}</td>}
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{stock.symbol}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm">{stock.name}</td>
@@ -71,4 +71,3 @@ const StockTable: React.FC<StockTableProps> = ({ stocks, institution }) => {
 }
 
 export default StockTable
-

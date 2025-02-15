@@ -139,7 +139,7 @@ const Chatbot = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleChat}
-            className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all z-50"
+            className="fixed bottom-4 right-4 bg-gradient-to-r from-emerald-400 to-blue-500 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all z-50 backdrop-blur-sm"
           >
             <MessageCircle size={24} />
           </motion.button>
@@ -154,25 +154,27 @@ const Chatbot = () => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className={`fixed bottom-4 right-4 w-84 h-[32rem] rounded-lg shadow-xl flex flex-col ${
-              darkMode ? "bg-black border-zinc-800" : "bg-white border-gray-200"
-            } border z-50`}
+            className={`fixed bottom-4 right-4 w-84 h-[32rem] rounded-2xl shadow-2xl flex flex-col ${
+              darkMode 
+                ? "bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50" 
+                : "bg-white/90 backdrop-blur-md border border-gray-200/50"
+            } z-50 overflow-hidden`}
           >
             {/* Header */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-green-500 text-white p-4 rounded-t-lg flex justify-between items-center"
+              className="bg-gradient-to-r from-emerald-400 to-blue-500 p-4 flex justify-between items-center backdrop-blur-sm"
             >
               <div className="flex items-center gap-2">
-                <MessageCircle size={20} />
-                <h3 className="font-bold">Financial Assistant</h3>
+                <MessageCircle size={20} className="text-white" />
+                <h3 className="font-bold text-white">Financial Assistant</h3>
               </div>
               <motion.button 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={toggleChat}
-                className="hover:bg-green-600 p-1 rounded transition-colors"
+                className="text-white/80 hover:text-white p-1 rounded-lg transition-colors"
               >
                 <X size={20} />
               </motion.button>
@@ -186,15 +188,19 @@ const Chatbot = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="mx-2"
+                  className="mx-2 mt-2"
                 >
-                  <Alert className={`${darkMode ? "bg-zinc-900 border-zinc-800" : "bg-green-50 border-green-100"}`}>
-                    <Info className={`h-4 w-4 ${darkMode ? "text-green-400" : "text-green-600"}`} />
+                  <Alert className={`${
+                    darkMode 
+                      ? "bg-zinc-800/50 border-zinc-700/50" 
+                      : "bg-violet-50/50 border-violet-100/50"
+                  } backdrop-blur-sm`}>
+                    <Info className="h-4 w-4 text-violet-400" />
                     <AlertDescription className="text-xs">
                       This assistant provides general financial information only.
                       <button
                         onClick={() => setShowDisclaimer(false)}
-                        className={`ml-2 ${darkMode ? "text-green-400 hover:text-green-300" : "text-green-600 hover:text-green-700"}`}
+                        className="ml-2 text-violet-400 hover:text-violet-500"
                       >
                         Dismiss
                       </button>
@@ -221,18 +227,22 @@ const Chatbot = () => {
                     >
                       <motion.div
                         whileHover={{ scale: 1.02 }}
-                        className={`max-w-[85%] p-3 rounded-lg ${
+                        className={`max-w-[85%] p-3 rounded-2xl backdrop-blur-sm ${
                           message.sender === "user"
-                            ? darkMode
-                              ? "bg-zinc-800 text-zinc-100"
-                              : "bg-green-100 text-gray-800"
+                            ? "bg-gradient-to-r from-violet-500/90 to-indigo-500/90 text-white"
                             : darkMode
-                              ? "bg-zinc-900 text-zinc-100"
-                              : "bg-gray-100 text-gray-800"
+                              ? "bg-zinc-800/50 text-zinc-100"
+                              : "bg-white/50 text-gray-800 border border-gray-200/20"
                         }`}
                       >
                         {message.text}
-                        <div className={`text-xs mt-1 ${darkMode ? "text-zinc-400" : "text-gray-500"}`}>
+                        <div className={`text-xs mt-1 ${
+                          message.sender === "user" 
+                            ? "text-white/70" 
+                            : darkMode 
+                              ? "text-zinc-400" 
+                              : "text-gray-500"
+                        }`}>
                           {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </div>
                       </motion.div>
@@ -245,7 +255,7 @@ const Chatbot = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className={`flex items-center gap-2 ${darkMode ? "text-zinc-400" : "text-gray-500"}`}
+                    className="flex items-center gap-2 text-violet-400"
                   >
                     <motion.span
                       animate={{ opacity: [0.5, 1, 0.5] }}
@@ -264,7 +274,11 @@ const Chatbot = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className={`p-4 border-t ${darkMode ? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}
+              className={`p-4 border-t ${
+                darkMode 
+                  ? "border-zinc-800/50 bg-zinc-900/50" 
+                  : "border-gray-200/50 bg-white/50"
+              } backdrop-blur-sm`}
             >
               <motion.div
                 initial="hidden"
@@ -288,8 +302,8 @@ const Chatbot = () => {
                     onClick={() => handlePromptClick(prompt)}
                     className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                       darkMode 
-                        ? "bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-zinc-800" 
-                        : "bg-gray-100 hover:bg-gray-200"
+                        ? "bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-100 border border-zinc-700/50" 
+                        : "bg-white/50 hover:bg-white/80 border border-gray-200/50 shadow-sm"
                     }`}
                   >
                     {prompt.icon}
@@ -306,17 +320,17 @@ const Chatbot = () => {
                   onKeyPress={(e) => e.key === "Enter" && handleSend()}
                   placeholder="Type your message..."
                   whileFocus={{ scale: 1.02 }}
-                  className={`flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                  className={`flex-1 p-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 ${
                     darkMode
-                      ? "bg-zinc-900 border-zinc-800 text-zinc-100 placeholder-zinc-500"
-                      : "bg-white border-gray-200 placeholder-gray-500"
+                      ? "bg-zinc-800/50 text-zinc-100 placeholder-zinc-500 border border-zinc-700/50"
+                      : "bg-white/50 border-gray-200/50 placeholder-gray-500 backdrop-blur-sm"
                   }`}
                 />
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handleSend}
-                  className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition-colors"
+                  className="bg-gradient-to-r from-emerald-400 to-blue-500 text-white p-2 rounded-xl hover:shadow-lg transition-all"
                 >
                   <Send size={20} />
                 </motion.button>

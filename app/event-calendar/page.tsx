@@ -139,21 +139,20 @@ export default function BusinessCalendar() {
 
   const getEventTypeColor = (type: string) => {
     const colors = {
-      AGM: "bg-blue-100 text-blue-800",
-      "Board Meeting": "bg-slate-100 text-slate-800",
-      Earnings: "bg-emerald-100 text-emerald-800",
-      "Stock Split": "bg-violet-100 text-violet-800",
-      "Rights Issue": "bg-orange-100 text-orange-800",
-      IPO: "bg-green-100 text-green-800",
-      Dividend: "bg-purple-100 text-purple-800",
-      Merger: "bg-indigo-100 text-indigo-800",
-      Acquisition: "bg-cyan-100 text-cyan-800",
-      "Corporate Event": "bg-gray-100 text-gray-800",
+      AGM: "bg-blue-100 text-blue-900 dark:bg-blue-400 dark:text-blue-950",
+      "Board Meeting": "bg-neutral-100 text-neutral-900 dark:bg-neutral-400 dark:text-neutral-950",
+      Earnings: "bg-emerald-100 text-emerald-900 dark:bg-emerald-400 dark:text-emerald-950",
+      "Stock Split": "bg-violet-100 text-violet-900 dark:bg-violet-400 dark:text-violet-950",
+      "Rights Issue": "bg-orange-100 text-orange-900 dark:bg-orange-400 dark:text-orange-950",
+      IPO: "bg-green-100 text-green-900 dark:bg-green-400 dark:text-green-950",
+      Dividend: "bg-purple-100 text-purple-900 dark:bg-purple-400 dark:text-purple-950",
+      Merger: "bg-indigo-100 text-indigo-900 dark:bg-indigo-400 dark:text-indigo-950",
+      Acquisition: "bg-cyan-100 text-cyan-900 dark:bg-cyan-400 dark:text-cyan-950",
+      "Corporate Event": "bg-neutral-100 text-neutral-900 dark:bg-neutral-400 dark:text-neutral-950",
     }
     return colors[type as keyof typeof colors] || colors["Corporate Event"]
   }
 
-  // Event type grouping for legend
   const eventGroups = {
     "Corporate Events": ["AGM", "Board Meeting", "Earnings"],
     "Stock Events": ["Stock Split", "Rights Issue"],
@@ -162,17 +161,17 @@ export default function BusinessCalendar() {
   }
 
   const Legend = () => (
-    <div className="mt-6 border-t pt-4">
-      <h3 className="text-lg font-semibold mb-4">Event Types</h3>
+    <div className="mt-6 border-t border-neutral-200 pt-4 dark:border-neutral-800">
+      <h3 className="text-lg font-semibold mb-4 text-neutral-900 dark:text-neutral-50">Event Types</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Object.entries(eventGroups).map(([group, types]) => (
           <div key={group} className="space-y-2">
-            <h4 className="font-medium text-sm text-gray-600">{group}</h4>
+            <h4 className="font-medium text-sm text-neutral-600 dark:text-neutral-300">{group}</h4>
             <div className="space-y-1">
               {types.map((type) => (
                 <div key={type} className="flex items-center space-x-2">
                   <span className={`w-3 h-3 rounded-full ${getEventTypeColor(type).replace("text-", "bg-")}`}></span>
-                  <span className="text-sm">{type}</span>
+                  <span className="text-sm text-neutral-700 dark:text-neutral-200">{type}</span>
                 </div>
               ))}
             </div>
@@ -185,7 +184,7 @@ export default function BusinessCalendar() {
   const CalendarView = () => (
     <div className="grid grid-cols-7 gap-2">
       {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-        <div key={day} className="text-center font-semibold p-2">
+        <div key={day} className="text-center font-semibold p-2 text-neutral-900 dark:text-neutral-50">
           {day}
         </div>
       ))}
@@ -197,12 +196,16 @@ export default function BusinessCalendar() {
         return (
           <div
             key={date.toString()}
-            className={`min-h-24 p-2 border rounded-lg ${
-              isSameMonth(date, currentMonth) ? "bg-white" : "bg-gray-50"
-            } ${isToday ? "ring-2 ring-blue-500" : ""}`}
+            className={`min-h-24 p-2 border rounded-lg border-neutral-200 
+              ${isSameMonth(date, currentMonth) 
+                ? "bg-white dark:bg-neutral-900" 
+                : "bg-neutral-50 dark:bg-neutral-950"
+              } 
+              ${isToday ? "ring-2 ring-blue-500" : ""}
+              dark:border-neutral-800`}
             style={{ gridColumnStart: index === 0 ? date.getDay() + 1 : "auto" }}
           >
-            <div className="font-medium text-sm mb-1">{date.getDate()}</div>
+            <div className="font-medium text-sm mb-1 text-neutral-900 dark:text-neutral-50">{date.getDate()}</div>
             <div className="space-y-1 max-h-20 overflow-y-auto">
               {events.map((event, i) => (
                 <div
@@ -237,7 +240,7 @@ export default function BusinessCalendar() {
           ([status, statusEvents]) =>
             statusEvents.length > 0 && (
               <div key={status} className="space-y-4">
-                <h3 className="text-lg font-semibold capitalize flex items-center gap-2">
+                <h3 className="text-lg font-semibold capitalize flex items-center gap-2 text-neutral-900 dark:text-neutral-50">
                   <Clock className="h-5 w-5" />
                   {getStatusLabel(status)}
                 </h3>
@@ -245,17 +248,24 @@ export default function BusinessCalendar() {
                   {statusEvents.map((event, index) => (
                     <div
                       key={index}
-                      className={`flex items-start p-4 border rounded-lg hover:bg-gray-50 ${getStatusStyles(status)}`}
+                      className={`flex items-start p-4 border rounded-lg 
+                        border-neutral-200 dark:border-neutral-800
+                        hover:bg-neutral-50 dark:hover:bg-neutral-800 
+                        ${getStatusStyles(status)}`}
                     >
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
                           <span className={`px-2 py-1 rounded text-sm ${getEventTypeColor(event.eventType)}`}>
                             {event.eventType}
                           </span>
-                          <span className="text-sm text-gray-500">{format(event.eventDate, "MMMM d, yyyy")}</span>
+                          <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                            {format(event.eventDate, "MMMM d, yyyy")}
+                          </span>
                         </div>
-                        <h3 className="text-lg font-semibold mt-2">{event.company}</h3>
-                        <p className="text-gray-600 mt-1">{event.title}</p>
+                        <h3 className="text-lg font-semibold mt-2 text-neutral-900 dark:text-neutral-50">
+                          {event.company}
+                        </h3>
+                        <p className="text-neutral-600 dark:text-neutral-300 mt-1">{event.title}</p>
                         <a
                           href={event.link}
                           target="_blank"
@@ -283,21 +293,34 @@ export default function BusinessCalendar() {
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleAlerts}
-              className={`p-2 rounded-full ${alertsEnabled ? "bg-blue-100 text-blue-800" : "hover:bg-gray-100"}`}
+              className={`p-2 rounded-full ${
+                alertsEnabled 
+                  ? "bg-blue-100 text-blue-900 dark:bg-blue-400 dark:text-blue-950" 
+                  : "hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              }`}
               title={alertsEnabled ? "Disable alerts" : "Enable alerts"}
             >
               {alertsEnabled ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
             </button>
-            <button onClick={() => navigateMonth(-1)} className="p-2 hover:bg-gray-100 rounded-full">
+            <button
+              onClick={() => navigateMonth(-1)}
+              className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full"
+            >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <span className="text-lg font-medium">
+            <span className="text-lg font-medium text-neutral-900 dark:text-neutral-50">
               {currentMonth.toLocaleString("default", { month: "long", year: "numeric" })}
             </span>
-            <button onClick={() => navigateMonth(1)} className="p-2 hover:bg-gray-100 rounded-full">
+            <button
+              onClick={() => navigateMonth(1)}
+              className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full"
+            >
               <ChevronRight className="h-5 w-5" />
             </button>
-            <button onClick={() => setIsCalendarView(!isCalendarView)} className="p-2 hover:bg-gray-100 rounded-full">
+            <button
+              onClick={() => setIsCalendarView(!isCalendarView)}
+              className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full"
+            >
               {isCalendarView ? <List className="h-5 w-5" /> : <CalendarIcon className="h-5 w-5" />}
             </button>
           </div>
@@ -331,4 +354,3 @@ export default function BusinessCalendar() {
     </Card>
   )
 }
-
