@@ -26,6 +26,7 @@ const TopBar = () => {
     setNotifications(notifications.map(n => ({ ...n, isNew: false })))
   }
 
+  
   const dropdownVariants = {
     hidden: { 
       opacity: 0,
@@ -53,7 +54,7 @@ const TopBar = () => {
   }
 
   return (
-    <div className="flex h-16 items-center justify-between px-4 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
+    <div className="flex h-16 items-center justify-between px-4 bg-white dark:bg-[#1a1a1a] border-b border-gray-200 dark:border-[#333333]">
       <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
         Dashboard
       </h1>
@@ -66,7 +67,7 @@ const TopBar = () => {
               setShowNotifications(!showNotifications)
               setShowSettings(false)
             }}
-            className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+            className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#262626] transition-colors"
           >
             <Bell className="h-6 w-6 text-gray-600 dark:text-gray-300" />
             {newNotificationsCount > 0 && (
@@ -87,7 +88,7 @@ const TopBar = () => {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="absolute right-0 mt-2 w-80 bg-white dark:bg-black rounded-lg shadow-lg ring-1 ring-gray-200 dark:ring-gray-800 z-50"
+                className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg ring-1 ring-gray-200 dark:ring-[#333333] z-50"
               >
                 <div className="p-4">
                   <div className="flex justify-between items-center mb-4">
@@ -108,7 +109,7 @@ const TopBar = () => {
                         className={`p-3 rounded-lg ${
                           notification.isNew
                             ? 'bg-emerald-50 dark:bg-emerald-900/20'
-                            : 'bg-gray-50 dark:bg-gray-900'
+                            : 'bg-gray-50 dark:bg-[#262626]'
                         }`}
                       >
                         <div className="text-sm dark:text-gray-200">{notification.text}</div>
@@ -131,7 +132,7 @@ const TopBar = () => {
               setShowSettings(!showSettings)
               setShowNotifications(false)
             }}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#262626] transition-colors"
           >
             <Settings className="h-6 w-6 text-gray-600 dark:text-gray-300" />
           </button>
@@ -143,31 +144,31 @@ const TopBar = () => {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="absolute right-0 mt-2 w-48 bg-white dark:bg-black rounded-lg shadow-lg ring-1 ring-gray-200 dark:ring-gray-800 z-50"
+                className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg ring-1 ring-gray-200 dark:ring-[#333333] z-50"
               >
                 <div className="py-1">
                   <button
-                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#262626] transition-colors"
                   >
                     <User className="h-4 w-4 mr-3" />
                     Profile
                   </button>
                   <button
-                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#262626] transition-colors"
                   >
                     <Mail className="h-4 w-4 mr-3" />
                     Messages
                   </button>
                   <button
-                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#262626] transition-colors"
                   >
                     <HelpCircle className="h-4 w-4 mr-3" />
                     Help
                   </button>
-                  <div className="border-t border-gray-200 dark:border-gray-800"></div>
+                  <div className="border-t border-gray-200 dark:border-[#333333]"></div>
                   <button
                     onClick={handleSignOut}
-                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-[#262626] transition-colors"
                   >
                     <LogOut className="h-4 w-4 mr-3" />
                     Sign out
