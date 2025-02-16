@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     // Get the audio stream using the generate method
     const audioStream = await client.generate({
-      voice: "Rachel",
+      voice: "Jeremy",
       model_id: "eleven_turbo_v2_5",
       text,
     });

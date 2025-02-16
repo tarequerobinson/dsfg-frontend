@@ -4,6 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useTheme } from "@/contexts/ThemeContext"
 import { ArrowUpIcon, ArrowDownIcon, BellIcon, XIcon, CurrencyDollarIcon, PlusCircleIcon, ChartBarIcon } from "@heroicons/react/24/outline"
+import StockTicker from "@/components/StockTicker"
 
 type Alert = {
   id: string
@@ -21,11 +22,22 @@ type Stock = {
   change: number
 }
 
+
+
 const MOCK_STOCKS: Stock[] = [
   { symbol: "NCBFG", price: 150.25, change: 2.5 },
   { symbol: "JMMBGL", price: 45.75, change: -0.5 },
   { symbol: "PJAM", price: 80.0, change: 1.2 },
-  { symbol: "SEP", price: 62.3, change: -1.8 },
+  { symbol: "WISYNCO", price: 62.3, change: -1.8 },
+  { symbol: "JAMT", price: 80.0, change: 1.2 },
+  { symbol: "TJH", price: 62.3, change: -1.8 },
+  { symbol: "KEY", price: 62.3, change: -1.8 },
+  { symbol: "BARITA", price: 62.3, change: -1.8 },
+  { symbol: "PROVEN", price: 62.3, change: -1.8 },
+
+  { symbol: "EPPLEY", price: 62.3, change: -1.8 },
+
+
 ]
 
 const JamaicaStockAlerts: React.FC = () => {
@@ -109,36 +121,7 @@ const JamaicaStockAlerts: React.FC = () => {
         </div> */}
 
         {/* Stock Tickers */}
-        <div className="mb-8 overflow-x-auto pb-4">
-          <div className="flex space-x-4 min-w-max">
-            {stocks.map((stock) => (
-              <div
-                key={stock.symbol}
-                className={`p-4 rounded-xl ${darkMode ? "bg-zinc-800" : "bg-white"} shadow-sm flex items-center space-x-4 min-w-[200px]`}
-              >
-                <div className={`p-2 rounded-lg ${darkMode ? "bg-zinc-700" : "bg-gray-100"}`}>
-                  <ChartBarIcon className={`w-6 h-6 ${stock.change >= 0 ? "text-green-500" : "text-red-500"}`} />
-                </div>
-                <div>
-                  <div className={`font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}>
-                    {stock.symbol}
-                  </div>
-                  <div className={`text-sm ${stock.change >= 0 ? "text-green-500" : "text-red-500"}`}>
-                    {formatPrice(stock.price)}
-                  </div>
-                  <div className={`text-xs flex items-center ${stock.change >= 0 ? "text-green-500" : "text-red-500"}`}>
-                    {stock.change >= 0 ? (
-                      <ArrowUpIcon className="w-3 h-3 mr-1" />
-                    ) : (
-                      <ArrowDownIcon className="w-3 h-3 mr-1" />
-                    )}
-                    {Math.abs(stock.change).toFixed(2)}%
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+<StockTicker darkMode={darkMode} />
 
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-2 gap-8">
