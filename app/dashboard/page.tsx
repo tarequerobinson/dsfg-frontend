@@ -4,7 +4,6 @@ import { useState } from "react"
 import AssetCard from "@/components/AssetCard"
 import AssetChart from "@/components/AssetChart"
 import AIAdvisor from "@/components/AIAdvisor"
-import PortfolioSummary from "@/components/PortfolioSummary"
 import ImpactAssessment from "@/components/ImpactAssessment"
 import PortfolioRestrictions from "@/components/PortfolioRestrictions"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -18,7 +17,10 @@ import {
   BanknotesIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  ChevronLeftIcon, ChevronRightIcon
+  ChevronLeftIcon, 
+  ChevronRightIcon,
+  GlobeAltIcon,
+  TrophyIcon
 } from "@heroicons/react/24/outline"
 import {motion, AnimatePresence } from "framer-motion"
 
@@ -38,13 +40,34 @@ export default function Dashboard() {
     liabilities: 75000
   })
 
+  // Calculate net worth
+  const netWorth = clientPortfolio.totalAssets - clientPortfolio.liabilities
+
+  // Mock data for financial standing (replace with real data)
+  const financialStanding = {
+    jamaicaPercentile: 95, // Top 5% in Jamaica
+    worldPercentile: 80, // Top 20% globally
+    jamaicaRank: 150000, // Rank among Jamaicans
+    worldRank: 1500000000, // Rank globally
+  }
+
   const pages = [
     {
       title: "Financial Overview",
       content: (
         <div className="space-y-6">
-          <div className="text-center mb-6">
-            <PortfolioSummary />
+          <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-6 rounded-xl text-white shadow-lg">
+            <h2 className="text-3xl font-bold mb-2">Net Worth</h2>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-5xl font-bold">${netWorth.toLocaleString()}</p>
+                <p className="text-sm mt-2">Your total financial value</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-semibold">Jamaica Rank: #{financialStanding.jamaicaRank.toLocaleString()}</p>
+                <p className="text-lg font-semibold">Global Rank: #{financialStanding.worldRank.toLocaleString()}</p>
+              </div>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <AssetCard 
@@ -62,9 +85,37 @@ export default function Dashboard() {
               color="text-red-500"
             />
           </div>
-          <div className="bg-white dark:bg-dark-surface p-4 rounded-xl">
-            <AssetChart darkMode={darkMode} simplified />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-dark-surface p-4 rounded-xl">
+              <h3 className="text-lg font-semibold mb-2 flex items-center">
+                <TrophyIcon className="w-5 h-5 mr-2 text-yellow-500" />
+                Jamaica Standing
+              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <span>Top {100 - financialStanding.jamaicaPercentile}%</span>
+                <span className="font-semibold">Rank: {financialStanding.jamaicaRank.toLocaleString()}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div className="bg-yellow-400 h-2.5 rounded-full" style={{ width: `${financialStanding.jamaicaPercentile}%` }}></div>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-dark-surface p-4 rounded-xl">
+              <h3 className="text-lg font-semibold mb-2 flex items-center">
+                <GlobeAltIcon className="w-5 h-5 mr-2 text-blue-500" />
+                Global Standing
+              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <span>Top {100 - financialStanding.worldPercentile}%</span>
+                <span className="font-semibold">Rank: {financialStanding.worldRank.toLocaleString()}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: `${financialStanding.worldPercentile}%` }}></div>
+              </div>
+            </div>
           </div>
+          {/* <div className="bg-white dark:bg-dark-surface p-4 rounded-xl">
+            <AssetChart darkMode={darkMode} simplified />
+          </div> */}
         </div>
       )
     },
@@ -125,7 +176,6 @@ export default function Dashboard() {
     }
   ]
 
-  // Rest of the component remains the same...
   return (
     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       {/* Header with Pagination */}

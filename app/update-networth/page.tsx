@@ -22,10 +22,42 @@ import {
 } from "@heroicons/react/24/outline"
 
 type ModalType = "asset" | "liability" | null
+type AssetType = string | null
+type FormData = {
+  name: string
+  value: string
+  description?: string
+  institution?: string
+  interestRate?: string
+  monthlyPayment?: string
+  maturityDate?: string
+  purchaseDate?: string
+  propertyAddress?: string
+  ticker?: string
+  shares?: string
+  accountType?: string
+  cryptocurrency?: string
+}
 
 export default function NetWorthTrackerPage() {
   const [activeModal, setActiveModal] = useState<ModalType>(null)
-  const [selectedAssetType, setSelectedAssetType] = useState<string | null>(null)
+  const [selectedAssetType, setSelectedAssetType] = useState<AssetType>(null)
+  const [selectedLiabilityType, setSelectedLiabilityType] = useState<AssetType>(null)
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    value: "",
+    description: "",
+    institution: "",
+    interestRate: "",
+    monthlyPayment: "",
+    maturityDate: "",
+    purchaseDate: "",
+    propertyAddress: "",
+    ticker: "",
+    shares: "",
+    accountType: "",
+    cryptocurrency: "",
+  })
 
   const assetTypes = [
     { name: "Cash & Equivalents", icon: CurrencyDollarIcon, color: "text-green-500" },
@@ -47,10 +79,506 @@ export default function NetWorthTrackerPage() {
     { name: "Other Liability", icon: ChartPieIcon, color: "text-gray-500" },
   ]
 
-  const handleAddAsset = (type: string) => {
-    setSelectedAssetType(type)
-    if (type === "Investment Portfolio") {
-      // Handle portfolio upload logic
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("Form submitted:", formData)
+    resetForm()
+  }
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      value: "",
+      description: "",
+      institution: "",
+      interestRate: "",
+      monthlyPayment: "",
+      maturityDate: "",
+      purchaseDate: "",
+      propertyAddress: "",
+      ticker: "",
+      shares: "",
+      accountType: "",
+      cryptocurrency: "",
+    })
+    setSelectedAssetType(null)
+    setSelectedLiabilityType(null)
+    setActiveModal(null)
+  }
+
+  const renderAssetForm = () => {
+    const commonFields = (
+      <>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="w-full p-2 border dark:border-dark-border rounded"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Value ($)</label>
+          <input
+            type="number"
+            name="value"
+            value={formData.value}
+            onChange={handleInputChange}
+            className="w-full p-2 border dark:border-dark-border rounded"
+            required
+          />
+        </div>
+      </>
+    )
+
+    switch (selectedAssetType) {
+      case "Cash & Equivalents":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Institution</label>
+              <input
+                type="text"
+                name="institution"
+                value={formData.institution}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+              />
+            </div>
+            <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+              Add Cash Asset
+            </button>
+          </form>
+        )
+
+      case "Real Estate":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Property Address</label>
+              <input
+                type="text"
+                name="propertyAddress"
+                value={formData.propertyAddress}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Purchase Date</label>
+              <input
+                type="date"
+                name="purchaseDate"
+                value={formData.purchaseDate}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+              />
+            </div>
+            <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+              Add Real Estate
+            </button>
+          </form>
+        )
+
+      case "Stocks & ETFs":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Ticker Symbol</label>
+              <input
+                type="text"
+                name="ticker"
+                value={formData.ticker}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Number of Shares</label>
+              <input
+                type="number"
+                name="shares"
+                value={formData.shares}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+              Add Stock
+            </button>
+          </form>
+        )
+
+      case "Retirement Accounts":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Account Type</label>
+              <input
+                type="text"
+                name="accountType"
+                value={formData.accountType}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                placeholder="401(k), IRA, Roth IRA, etc."
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Institution</label>
+              <input
+                type="text"
+                name="institution"
+                value={formData.institution}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+              />
+            </div>
+            <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+              Add Retirement Account
+            </button>
+          </form>
+        )
+
+      case "Cryptocurrency":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Cryptocurrency</label>
+              <input
+                type="text"
+                name="cryptocurrency"
+                value={formData.cryptocurrency}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                placeholder="BTC, ETH, etc."
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+              Add Cryptocurrency
+            </button>
+          </form>
+        )
+
+      case "Private Equity":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Company/Investment Name</label>
+              <input
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Purchase Date</label>
+              <input
+                type="date"
+                name="purchaseDate"
+                value={formData.purchaseDate}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+              />
+            </div>
+            <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+              Add Private Equity
+            </button>
+          </form>
+        )
+
+      default:
+        return null
+    }
+  }
+
+  const renderLiabilityForm = () => {
+    const commonFields = (
+      <>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="w-full p-2 border dark:border-dark-border rounded"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Amount ($)</label>
+          <input
+            type="number"
+            name="value"
+            value={formData.value}
+            onChange={handleInputChange}
+            className="w-full p-2 border dark:border-dark-border rounded"
+            required
+          />
+        </div>
+      </>
+    )
+
+    const loanFields = (
+      <>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
+          <input
+            type="number"
+            name="interestRate"
+            value={formData.interestRate}
+            onChange={handleInputChange}
+            className="w-full p-2 border dark:border-dark-border rounded"
+            step="0.01"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Monthly Payment ($)</label>
+          <input
+            type="number"
+            name="monthlyPayment"
+            value={formData.monthlyPayment}
+            onChange={handleInputChange}
+            className="w-full p-2 border dark:border-dark-border rounded"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Maturity Date</label>
+          <input
+            type="date"
+            name="maturityDate"
+            value={formData.maturityDate}
+            onChange={handleInputChange}
+            className="w-full p-2 border dark:border-dark-border rounded"
+          />
+        </div>
+      </>
+    )
+
+    switch (selectedLiabilityType) {
+      case "Credit Card Debt":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Interest Rate (%)</label>
+              <input
+                type="number"
+                name="interestRate"
+                value={formData.interestRate}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                step="0.01"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Institution</label>
+              <input
+                type="text"
+                name="institution"
+                value={formData.institution}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
+              Add Credit Card Debt
+            </button>
+          </form>
+        )
+
+      case "Mortgage":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            {loanFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Property Address</label>
+              <input
+                type="text"
+                name="propertyAddress"
+                value={formData.propertyAddress}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
+              Add Mortgage
+            </button>
+          </form>
+        )
+
+      case "Student Loan":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            {loanFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Institution</label>
+              <input
+                type="text"
+                name="institution"
+                value={formData.institution}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
+              Add Student Loan
+            </button>
+          </form>
+        )
+
+      case "Personal Loan":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            {loanFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Institution</label>
+              <input
+                type="text"
+                name="institution"
+                value={formData.institution}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
+              Add Personal Loan
+            </button>
+          </form>
+        )
+
+      case "Car Loan":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            {loanFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Institution</label>
+              <input
+                type="text"
+                name="institution"
+                value={formData.institution}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Vehicle Description</label>
+              <input
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                placeholder="Year, Make, Model"
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
+              Add Car Loan
+            </button>
+          </form>
+        )
+
+      case "Business Debt":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            {loanFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Institution</label>
+              <input
+                type="text"
+                name="institution"
+                value={formData.institution}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Business Name</label>
+              <input
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <button type="submit" className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
+              Add Business Debt
+            </button>
+          </form>
+        )
+
+      case "Other Liability":
+        return (
+          <form onSubmit={handleSubmit}>
+            {commonFields}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <input
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Due Date</label>
+              <input
+                type="date"
+                name="maturityDate"
+                value={formData.maturityDate}
+                onChange={handleInputChange}
+                className="w-full p-2 border dark:border-dark-border rounded"
+              />
+            </div>
+            <button type="submit" className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
+              Add Other Liability
+            </button>
+          </form>
+        )
+
+      default:
+        return null
     }
   }
 
@@ -114,10 +642,7 @@ export default function NetWorthTrackerPage() {
                 <h3 className="text-2xl font-bold">Track New Asset</h3>
               </div>
               <button
-                onClick={() => {
-                  setActiveModal(null)
-                  setSelectedAssetType(null)
-                }}
+                onClick={resetForm}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-dark-bg rounded-full"
               >
                 <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-dark-text" />
@@ -137,12 +662,25 @@ export default function NetWorthTrackerPage() {
                 </div>
                 <PortfolioUpload />
               </div>
+            ) : selectedAssetType ? (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <button
+                    onClick={() => setSelectedAssetType(null)}
+                    className="flex items-center gap-1 text-sm text-gray-600 dark:text-dark-text hover:text-gray-900"
+                  >
+                    <ArrowUturnLeftIcon className="w-4 h-4" />
+                    Back to Assets
+                  </button>
+                </div>
+                {renderAssetForm()}
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {assetTypes.map(({ name, icon: Icon, color }) => (
                   <button
                     key={name}
-                    onClick={() => handleAddAsset(name)}
+                    onClick={() => setSelectedAssetType(name)}
                     className="p-4 border dark:border-dark-border rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors text-left group relative overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -177,34 +715,50 @@ export default function NetWorthTrackerPage() {
                 <h3 className="text-2xl font-bold">Track New Liability</h3>
               </div>
               <button
-                onClick={() => setActiveModal(null)}
+                onClick={resetForm}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-dark-bg rounded-full"
               >
                 <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-dark-text" />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {liabilityTypes.map(({ name, icon: Icon, color }) => (
-                <button
-                  key={name}
-                  className="p-4 border dark:border-dark-border rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors text-left group relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="flex items-center gap-4 relative z-10">
-                    <div className={`p-3 rounded-lg ${color} bg-opacity-10`}>
-                      <Icon className="w-8 h-8" />
+            {selectedLiabilityType ? (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <button
+                    onClick={() => setSelectedLiabilityType(null)}
+                    className="flex items-center gap-1 text-sm text-gray-600 dark:text-dark-text hover:text-gray-900"
+                  >
+                    <ArrowUturnLeftIcon className="w-4 h-4" />
+                    Back to Liabilities
+                  </button>
+                </div>
+                {renderLiabilityForm()}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {liabilityTypes.map(({ name, icon: Icon, color }) => (
+                  <button
+                    key={name}
+                    onClick={() => setSelectedLiabilityType(name)}
+                    className="p-4 border dark:border-dark-border rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors text-left group relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-4 relative z-10">
+                      <div className={`p-3 rounded-lg ${color} bg-opacity-10`}>
+                        <Icon className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-1">{name}</h4>
+                        <p className="text-sm text-gray-500 dark:text-dark-text">
+                          {name.includes("Loan") ? "Track loan balance" : "Monitor liability"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold mb-1">{name}</h4>
-                      <p className="text-sm text-gray-500 dark:text-dark-text">
-                        {name.includes("Loan") ? "Track loan balance" : "Monitor liability"}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

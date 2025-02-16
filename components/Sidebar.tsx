@@ -19,7 +19,9 @@ import {
   LineChart,
   LandPlot,
   Calendar,
-  Scale
+  Scale,
+  BellRing,
+  VibrateIcon
 } from "lucide-react"
 
 const Sidebar = () => {
@@ -88,10 +90,11 @@ const Sidebar = () => {
   const otherMenuItems = [
     { href: "/update-networth", icon: Scale, label: "Update Net Worth", badge: "Live" },
     { href: "/news", icon: Newspaper, label: "News" },
+    { href: "/alerts", icon: VibrateIcon, label: "Alerts" },
     { href: "/event-calendar", icon: Calendar, label: "Events" },
     { href: "/profile", icon: User, label: "Profile" },
     { href: "/risk-assessment", icon: AlertTriangle, label: "Risk Assessment" },
-    { href: "/financial-summarizer", icon: FileText, label: "Summarizer" }
+    // { href: "/financial-summarizer", icon: FileText, label: "Summarizer" }
   ]
 
   return (

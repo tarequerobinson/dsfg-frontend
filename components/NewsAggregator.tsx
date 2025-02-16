@@ -10,7 +10,7 @@ import {
   ChartBarIcon,
   UserIcon,
 } from "@heroicons/react/24/outline"
-
+import ReactMarkdown from "react-markdown"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import {
   Pagination,
@@ -21,6 +21,11 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import OpenAI from "openai"
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
+
+
 
 interface NewsItem {
   title: string
@@ -47,11 +52,6 @@ const NewsAggregator = () => {
   const [articleLoading, setArticleLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
 
-  const openai = new OpenAI({
-    baseURL: "https://api.deepseek.com/v1",
-    apiKey: "sk-66538260acee404caa2a8f4ddd73167f",
-    dangerouslyAllowBrowser: true,
-  })
 
   const fetchArticleContent = async (url: string) => {
     try {
@@ -152,41 +152,95 @@ const NewsAggregator = () => {
     fetchNews()
   }, [])
 
-  useEffect(() => {
-    const generateAISummary = async () => {
-      if (filteredNews.length === 0) return
+// Add these to your component
+const [lastSummaryTime, setLastSummaryTime] = useState<number>(0)
+const SUMMARY_COOLDOWN = 30000 // 30 seconds
 
+useEffect(() => {
+  const generateAISummary = async () => {
+    if (filteredNews.length === 0 || 
+        Date.now() - lastSummaryTime < SUMMARY_COOLDOWN ||
+        summaryLoading
+    ) return
+
+    try {
       setSummaryLoading(true)
-      try {
-        const topArticles = filteredNews
-          .slice(0, 3)
-          .map((item) => `${item.title}: ${item.description}`)
-          .join("\n\n")
+      const topArticles = filteredNews.slice(0, 50)
 
-        const completion = await openai.chat.completions.create({
-          messages: [
-            {
-              role: "system",
-              content: "You are a news assistant. Generate a concise summary of these articles:",
-            },
-            {
-              role: "user",
-              content: topArticles,
-            },
-          ],
-          model: "deepseek-chat",
-        })
+      const response = await fetch("/api/summarize-news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          articles: topArticles,
+          prompt: `As a Jamaican financial analyst, create a 150-word markdown brief with:
+          1. **Jamaica Financial Brief** header with date
+          2. Weather metaphor reflecting economic climate
+          3. **Key Developments** with <span class="text-green-500">[Positive]</span>/<span class="text-orange-500">[Watch]</span>
+          4. **Your Money Impact** section
+          5. **JSE Spotlight** with ↗︎/↘︎ symbols
+          Use only span elements for coloring, no other HTML.`
+        }),
+      })
 
-        setSummary(completion.choices[0].message.content || "")
-      } catch (error) {
-        setSummary("Failed to generate AI summary")
-      } finally {
-        setSummaryLoading(false)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Summary service unavailable")
       }
-    }
 
-    generateAISummary()
-  }, [filteredNews, openai.chat.completions.create]) // Added openai.chat.completions.create to dependencies
+      const data = await response.json()
+      setSummary(data.summary)
+      setLastSummaryTime(Date.now())
+    } catch (error) {
+      console.error("Summary error:", error)
+      setSummary(error instanceof Error ? error.message : "Unable to generate summary")
+      // Queue retry after cooldown
+      setTimeout(() => setLastSummaryTime(0), SUMMARY_COOLDOWN)
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
+  const debouncedSummary = setTimeout(generateAISummary, 2000)
+  return () => clearTimeout(debouncedSummary)
+}, [filteredNews, lastSummaryTime])
+
+const markdownComponents = {
+  a: ({ node, ...props }: any) => (
+    <a 
+      {...props} 
+      className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+      target="_blank" 
+      rel="noopener noreferrer"
+    />
+  ),
+  h3: ({ node, ...props }: any) => (
+    <h3 {...props} className="text-xl font-semibold mt-4 mb-2" />
+  ),
+  ul: ({ node, ...props }: any) => (
+    <ul {...props} className="list-disc pl-6 space-y-1" />
+  ),
+  ol: ({ node, ...props }: any) => (
+    <ol {...props} className="list-decimal pl-6 space-y-1" />
+  ),
+  span: ({ node, ...props }: any) => {
+    const colorMatch = props.className?.match(/text-(.+)/)
+    return colorMatch ? (
+      <span className={`text-${colorMatch[1]} dark:text-${colorMatch[1]}-300`}>
+        {props.children}
+      </span>
+    ) : (
+      <span {...props} />
+    )
+  },
+  strong: ({ node, ...props }: any) => (
+    <strong className="font-semibold text-green-600 dark:text-green-400" {...props} />
+  ),
+  em: ({ node, ...props }: any) => (
+    <em className="italic text-yellow-600 dark:text-yellow-400" {...props} />
+  )
+}
+
 
   if (selectedArticle) {
     return (
@@ -301,19 +355,48 @@ const NewsAggregator = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {filteredNews.length > 0 && (
-              <div className="p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg border border-neutral-200 dark:border-dark-border">
-                <h3 className="text-lg font-semibold mb-2 flex items-center text-neutral-900 dark:text-dark-text">
-                  <ChartBarIcon className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
-                  News Summary
-                  {summaryLoading && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 dark:border-blue-400 ml-2" />
-                  )}
-                </h3>
-                {summary && <p className="text-neutral-600 dark:text-dark-text">{summary}</p>}
-              </div>
-            )}
-
+  {filteredNews.length > 0 && (
+    <div className="p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg border border-neutral-200 dark:border-dark-border">
+      <h3 className="text-lg font-semibold mb-2 flex items-center text-neutral-900 dark:text-dark-text">
+        <ChartBarIcon className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
+        News Summary
+        {summaryLoading && (
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 dark:border-blue-400 ml-2" />
+        )}
+      </h3>
+      {summary ? (
+        <div className="text-neutral-600 dark:text-dark-text prose dark:prose-invert max-w-none">
+<ReactMarkdown
+  remarkPlugins={[remarkGfm]}
+  rehypePlugins={[
+    rehypeRaw, 
+    [rehypeSanitize, {
+      tagNames: ['span'],
+      attributes: {
+        span: ['className']
+      }
+    }]
+  ]}
+  components={markdownComponents}
+  urlTransform={(uri) => {
+    try {
+      const url = new URL(uri)
+      return url.protocol === 'http:' || url.protocol === 'https:' ? uri : ''
+    } catch {
+      return ''
+    }
+  }}
+>
+  {summary}
+</ReactMarkdown>
+        </div>
+      ) : (
+        <p className="text-neutral-500 dark:text-neutral-400">
+          Analysis unavailable at the moment
+        </p>
+      )}
+    </div>
+  )}
             {paginatedNews.map((item, index) => (
               <div
                 key={index}
