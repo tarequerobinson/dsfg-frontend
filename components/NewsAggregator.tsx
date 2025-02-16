@@ -24,6 +24,8 @@ import OpenAI from "openai"
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
+import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/outline"
+
 
 
 
@@ -51,6 +53,12 @@ const NewsAggregator = () => {
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
   const [articleLoading, setArticleLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [isPlaying, setIsPlaying] = useState(false);
+const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
+const [audioError, setAudioError] = useState<string | null>(null);
+const [isLoading, setIsLoading] = useState(false);
+
+
 
 
   const fetchArticleContent = async (url: string) => {
@@ -86,6 +94,122 @@ const NewsAggregator = () => {
     const content = await fetchArticleContent(article.link)
     setSelectedArticle({ ...article, content })
   }
+
+
+
+  const handleTextToSpeech = async () => {
+    // If already playing, stop the current audio
+    if (isPlaying && audioRef) {
+      audioRef.pause();
+      audioRef.currentTime = 0;
+      setIsPlaying(false);
+      return;
+    }
+  
+    setIsLoading(true);
+    setAudioError(null);
+  
+    // Create an AbortController for the fetch request
+    const abortController = new AbortController();
+  
+    try {
+      // Clean up previous audio if it exists
+      if (audioRef) {
+        audioRef.pause();
+        URL.revokeObjectURL(audioRef.src);
+        setAudioRef(null);
+      }
+  
+      if (!summary.trim()) {
+        throw new Error('No text available to play');
+      }
+  
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: summary }),
+        signal: abortController.signal
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate audio');
+      }
+  
+      const contentType = response.headers.get('Content-Type');
+      if (!contentType?.includes('audio/mpeg')) {
+        throw new Error('Invalid audio format received');
+      }
+  
+      const blob = await response.blob();
+      if (blob.size === 0) {
+        throw new Error('Received empty audio data');
+      }
+  
+      const audio = new Audio();
+      
+      // Set up event listeners before setting the source
+      const audioLoadPromise = new Promise((resolve, reject) => {
+        audio.addEventListener('loadeddata', resolve, { once: true });
+        audio.addEventListener('error', () => {
+          const error = audio.error;
+          reject(new Error(error ? `Audio error: ${error.message}` : 'Error loading audio'));
+        }, { once: true });
+      });
+  
+      // Create object URL and set it as the audio source
+      const audioUrl = URL.createObjectURL(blob);
+      audio.src = audioUrl;
+  
+      // Wait for audio to load
+      await audioLoadPromise;
+  
+      // Set up playback event listeners
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+        // Keep the URL for potential replay
+      });
+  
+      audio.addEventListener('pause', () => {
+        setIsPlaying(false);
+      });
+  
+      // Start playback
+      await audio.play();
+      setAudioRef(audio);
+      setIsPlaying(true);
+  
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Audio request was cancelled');
+      } else {
+        console.error('Audio playback error:', error);
+        setAudioError(error instanceof Error ? error.message : 'Error playing audio');
+      }
+      setIsPlaying(false);
+    } finally {
+      setIsLoading(false);
+    }
+  
+    // Return cleanup function
+    return () => {
+      abortController.abort();
+    };
+  };
+  
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      if (audioRef) {
+        audioRef.pause();
+        URL.revokeObjectURL(audioRef.src);
+      }
+    };
+  }, [audioRef]);
+      
+
+
+
 
   const filteredNews = news.filter((item) => {
     const matchesSearch =
@@ -356,6 +480,8 @@ const markdownComponents = {
         ) : (
           <div className="space-y-6">
   {filteredNews.length > 0 && (
+
+
     <div className="p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg border border-neutral-200 dark:border-dark-border">
       <h3 className="text-lg font-semibold mb-2 flex items-center text-neutral-900 dark:text-dark-text">
         <ChartBarIcon className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
@@ -364,6 +490,30 @@ const markdownComponents = {
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 dark:border-blue-400 ml-2" />
         )}
       </h3>
+
+
+
+
+      <div className="flex items-center gap-2">
+    {audioError && (
+      <span className="text-sm text-red-500">{audioError}</span>
+    )}
+    <button
+      onClick={handleTextToSpeech}
+      disabled={isLoading}
+      className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50"
+      title={isPlaying ? "Stop" : "Play summary"}
+    >
+      {isLoading ? (
+        <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
+      ) : isPlaying ? (
+        <SpeakerXMarkIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+      ) : (
+        <SpeakerWaveIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+      )}
+    </button>
+  </div>
+
       {summary ? (
         <div className="text-neutral-600 dark:text-dark-text prose dark:prose-invert max-w-none">
 <ReactMarkdown
@@ -396,6 +546,10 @@ const markdownComponents = {
         </p>
       )}
     </div>
+
+
+
+
   )}
             {paginatedNews.map((item, index) => (
               <div
