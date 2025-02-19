@@ -121,7 +121,7 @@ export default function NetWorthTrackerPage() {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full p-2 border dark:border-dark-border rounded"
+            className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
             required
           />
         </div>
@@ -132,7 +132,7 @@ export default function NetWorthTrackerPage() {
             name="value"
             value={formData.value}
             onChange={handleInputChange}
-            className="w-full p-2 border dark:border-dark-border rounded"
+            className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
             required
           />
         </div>
@@ -151,7 +151,7 @@ export default function NetWorthTrackerPage() {
                 name="institution"
                 value={formData.institution}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
               />
             </div>
             <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
@@ -171,7 +171,7 @@ export default function NetWorthTrackerPage() {
                 name="propertyAddress"
                 value={formData.propertyAddress}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -182,7 +182,7 @@ export default function NetWorthTrackerPage() {
                 name="purchaseDate"
                 value={formData.purchaseDate}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
               />
             </div>
             <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
@@ -202,7 +202,7 @@ export default function NetWorthTrackerPage() {
                 name="ticker"
                 value={formData.ticker}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -213,7 +213,7 @@ export default function NetWorthTrackerPage() {
                 name="shares"
                 value={formData.shares}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -234,7 +234,7 @@ export default function NetWorthTrackerPage() {
                 name="accountType"
                 value={formData.accountType}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 placeholder="401(k), IRA, Roth IRA, etc."
                 required
               />
@@ -246,7 +246,7 @@ export default function NetWorthTrackerPage() {
                 name="institution"
                 value={formData.institution}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
               />
             </div>
             <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
@@ -266,7 +266,7 @@ export default function NetWorthTrackerPage() {
                 name="cryptocurrency"
                 value={formData.cryptocurrency}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 placeholder="BTC, ETH, etc."
                 required
               />
@@ -288,7 +288,7 @@ export default function NetWorthTrackerPage() {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -299,7 +299,7 @@ export default function NetWorthTrackerPage() {
                 name="purchaseDate"
                 value={formData.purchaseDate}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
               />
             </div>
             <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
@@ -323,7 +323,7 @@ export default function NetWorthTrackerPage() {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full p-2 border dark:border-dark-border rounded"
+            className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
             required
           />
         </div>
@@ -334,7 +334,7 @@ export default function NetWorthTrackerPage() {
             name="value"
             value={formData.value}
             onChange={handleInputChange}
-            className="w-full p-2 border dark:border-dark-border rounded"
+            className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
             required
           />
         </div>
@@ -350,7 +350,7 @@ export default function NetWorthTrackerPage() {
             name="interestRate"
             value={formData.interestRate}
             onChange={handleInputChange}
-            className="w-full p-2 border dark:border-dark-border rounded"
+            className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
             step="0.01"
             required
           />
@@ -362,7 +362,7 @@ export default function NetWorthTrackerPage() {
             name="monthlyPayment"
             value={formData.monthlyPayment}
             onChange={handleInputChange}
-            className="w-full p-2 border dark:border-dark-border rounded"
+            className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
             required
           />
         </div>
@@ -373,7 +373,7 @@ export default function NetWorthTrackerPage() {
             name="maturityDate"
             value={formData.maturityDate}
             onChange={handleInputChange}
-            className="w-full p-2 border dark:border-dark-border rounded"
+            className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
           />
         </div>
       </>
@@ -391,7 +391,7 @@ export default function NetWorthTrackerPage() {
                 name="interestRate"
                 value={formData.interestRate}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 step="0.01"
                 required
               />
@@ -403,7 +403,7 @@ export default function NetWorthTrackerPage() {
                 name="institution"
                 value={formData.institution}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -425,7 +425,7 @@ export default function NetWorthTrackerPage() {
                 name="propertyAddress"
                 value={formData.propertyAddress}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -447,7 +447,7 @@ export default function NetWorthTrackerPage() {
                 name="institution"
                 value={formData.institution}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -469,7 +469,7 @@ export default function NetWorthTrackerPage() {
                 name="institution"
                 value={formData.institution}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -491,7 +491,7 @@ export default function NetWorthTrackerPage() {
                 name="institution"
                 value={formData.institution}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -502,7 +502,7 @@ export default function NetWorthTrackerPage() {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 placeholder="Year, Make, Model"
                 required
               />
@@ -525,7 +525,7 @@ export default function NetWorthTrackerPage() {
                 name="institution"
                 value={formData.institution}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -536,7 +536,7 @@ export default function NetWorthTrackerPage() {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -557,7 +557,7 @@ export default function NetWorthTrackerPage() {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
                 required
               />
             </div>
@@ -568,7 +568,7 @@ export default function NetWorthTrackerPage() {
                 name="maturityDate"
                 value={formData.maturityDate}
                 onChange={handleInputChange}
-                className="w-full p-2 border dark:border-dark-border rounded"
+                className="w-full p-2 border dark:border-dark-border dark:bg-dark-bg rounded"
               />
             </div>
             <button type="submit" className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
@@ -635,7 +635,7 @@ export default function NetWorthTrackerPage() {
       {/* Asset Modal */}
       {activeModal === "asset" && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 w-full max-w-2xl border dark:border-dark-border">
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 w-full max-w-2xl border dark:border-dark-border dark:bg-dark-bg">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
                 <ChartBarIcon className="w-8 h-8 text-green-500" />
@@ -681,7 +681,7 @@ export default function NetWorthTrackerPage() {
                   <button
                     key={name}
                     onClick={() => setSelectedAssetType(name)}
-                    className="p-4 border dark:border-dark-border rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors text-left group relative overflow-hidden"
+                    className="p-4 border dark:border-dark-border dark:bg-dark-bg rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors text-left group relative overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="flex items-center gap-4 relative z-10">
@@ -708,7 +708,7 @@ export default function NetWorthTrackerPage() {
       {/* Liability Modal */}
       {activeModal === "liability" && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 w-full max-w-2xl border dark:border-dark-border">
+          <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 w-full max-w-2xl border dark:border-dark-border dark:bg-dark-bg">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
                 <ScaleIcon className="w-8 h-8 text-red-500" />
@@ -741,7 +741,7 @@ export default function NetWorthTrackerPage() {
                   <button
                     key={name}
                     onClick={() => setSelectedLiabilityType(name)}
-                    className="p-4 border dark:border-dark-border rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors text-left group relative overflow-hidden"
+                    className="p-4 border dark:border-dark-border dark:bg-dark-bg rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg transition-colors text-left group relative overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="flex items-center gap-4 relative z-10">

@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { ArrowRight, BarChart2, Lock, DollarSign, BookOpen } from "lucide-react"
+import { ArrowRight, BarChart2, Lock, DollarSign, BookOpen, TrendingUp, Calendar, PieChartIcon, NewspaperIcon, LucideVibrate } from "lucide-react"
 import { useTheme } from "@/contexts/ThemeContext"
 import DarkModeToggle from "@/components/DarkModeToggle"
 import { useState, useEffect } from "react"
@@ -123,7 +123,7 @@ export default function LandingPage() {
               Key Features
             </h2>
             <div className="mt-16 grid gap-8 grid-cols-1 md:grid-cols-3">
-              {[PortfolioManagement, RiskManagement, FinancialPlanning].map((feature, idx) => (
+              {[PortfolioManagement, RiskManagement, FinancialPlanning, NewsAggregator, BusinessCalendar, StockTickerAlerts].map((feature, idx) => (
                 <div key={idx} className="relative group">
                   <div className={`absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 ${
                     darkMode ? 'opacity-[0.03]' : 'opacity-5'
@@ -158,7 +158,7 @@ export default function LandingPage() {
             <p className={`text-center ${
               darkMode ? 'text-zinc-400' : 'text-neutral-600'
             }`}>
-              © 2024 DSFG - The Dollars and Sense Financial Group. All rights reserved.
+              © 2025 DSFG - The Dollars and Sense Financial Group. All rights reserved.
             </p>
           </div>
         </footer>
@@ -168,7 +168,7 @@ export default function LandingPage() {
 }
 
 const PortfolioManagement = {
-  icon: BarChart2,
+  icon: PieChartIcon,
   title: "Portfolio Management",
   description: "Consolidate and monitor all your assets in one place."
 }
@@ -176,11 +176,32 @@ const PortfolioManagement = {
 const RiskManagement = {
   icon: Lock,
   title: "Risk Management",
-  description: "Assess and manage your portfolio risk with AI-powered insights."
+  description: "Assess and manage your portfolio risk with insights."
 }
 
 const FinancialPlanning = {
   icon: DollarSign,
   title: "Financial Planning",
   description: "Get personalized recommendations to achieve your financial goals."
+}
+
+
+
+
+const BusinessCalendar = {
+  icon: Calendar,
+  title: "Business Calendar",
+  description: "Consolidate and monitor all your assets in one place."
+}
+
+const StockTickerAlerts = {
+  icon: LucideVibrate,
+  title: "Stock Ticker Alerts",
+  description: "Create Email, Telegram and SMS alerts for select stock price changes"
+}
+
+const NewsAggregator = {
+  icon: NewspaperIcon,
+  title: "News Aggregator",
+  description: "Get the latest news relevant to your financial goals."
 }

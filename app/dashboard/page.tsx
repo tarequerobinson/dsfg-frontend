@@ -23,6 +23,7 @@ import {
   TrophyIcon
 } from "@heroicons/react/24/outline"
 import {motion, AnimatePresence } from "framer-motion"
+import AssetDistributionChart from "@/components/AssetDistributionChart"
 
 export default function Dashboard() {
   const { darkMode } = useTheme()
@@ -55,21 +56,28 @@ export default function Dashboard() {
     {
       title: "Financial Overview",
       content: (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-6 rounded-xl text-white shadow-lg">
-            <h2 className="text-3xl font-bold mb-2">Net Worth</h2>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-5xl font-bold">${netWorth.toLocaleString()}</p>
-                <p className="text-sm mt-2">Your total financial value</p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-semibold">Jamaica Rank: #{financialStanding.jamaicaRank.toLocaleString()}</p>
-                <p className="text-lg font-semibold">Global Rank: #{financialStanding.worldRank.toLocaleString()}</p>
-              </div>
-            </div>
+<div className="space-y-6">
+
+
+<div className="p-[2px]  bg-white dark:bg-dark-surface rounded-xl">
+
+      <div className="p-6 rounded-xl text-black dark:text-white shadow-lg">
+        <h2 className="text-3xl font-bold mb-2">Net Worth</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-5xl font-bold">${netWorth.toLocaleString()}</p>
+            <p className="text-sm mt-2">Your total financial value</p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="text-right">
+            <p className="text-lg font-semibold">Jamaica Rank: #{financialStanding.jamaicaRank.toLocaleString()}</p>
+            <p className="text-lg font-semibold">Global Rank: #{financialStanding.worldRank.toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
+
+      </div>
+      
+                <div className="grid grid-cols-2 gap-4">
             <AssetCard 
               title="Total Assets" 
               value={`$${clientPortfolio.totalAssets.toLocaleString()}`} 
@@ -116,6 +124,17 @@ export default function Dashboard() {
           {/* <div className="bg-white dark:bg-dark-surface p-4 rounded-xl">
             <AssetChart darkMode={darkMode} simplified />
           </div> */}
+        </div>
+      )
+    },
+
+
+
+    {
+      title: "Asset Details",
+      content: (
+        <div className="space-y-6">
+          <AssetDistributionChart portfolio={clientPortfolio} />
         </div>
       )
     },
