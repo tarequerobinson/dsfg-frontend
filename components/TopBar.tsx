@@ -65,7 +65,7 @@ const TopBar = ({ floating = false }) => {
 const financialServices = [
   { 
     id: 1, 
-    name: "Card Payments", 
+    name: "CSV Upload", 
     icon: CardIcon,
     path: "/services/card-payments",
     description: "Make purchases online and in-store with virtual and physical debit cards"

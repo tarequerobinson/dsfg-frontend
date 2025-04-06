@@ -27,17 +27,68 @@ export default function SignIn() {
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /*const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+        const response = await fetch("/api/auth/signin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            setError(data.message || "Invalid credentials");
+            return;
+        }
+
+        router.push("/dashboard");
+    } catch (error) {
+        setError("Server error. Please try again later.");
+    }
+  };*/
+
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault()
+      setError("")
+
+      try {
+        const response = await fetch("http://localhost:5000/auth/signin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        })
+    
+        const data = await response.json()
+    
+        if (!response.ok) {
+          setError(data.message || "Something went wrong")
+          return
+        }
+        document.cookie = "auth=true; path=/"
+        localStorage.setItem("token", data.access_token);
+        router.push("/dashboard")
+      } catch (error) {
+        setError("Server error. Please try again later.")
+      }
+    }
+
+
+  /*const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     // Hardcoded credential check
     if (email === "demo@dsfg.com" && password === "demopass123") {
-      // Set a cookie to simulate authentication
+       //Set a cookie to simulate authentication
       document.cookie = "auth=true; path=/"
       router.push("/dashboard")
     } else {
       setError("Invalid credentials. Please use demo@dsfg.com and demopass123.")
     }
-  }
+  }*/
 
   const handleGoogleSignIn = () => {
     signIn("google", { callbackUrl: "/dashboard" })

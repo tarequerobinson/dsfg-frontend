@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
   const isLoggedIn = request.cookies.get("auth")?.value === "true"
-  const isAuthPage = request.nextUrl.pathname.startsWith("/signin") || request.nextUrl.pathname.startsWith("/signup")||request.nextUrl.pathname.startsWith("/resources")
+  const isAuthPage = request.nextUrl.pathname.startsWith("/signin") || request.nextUrl.pathname.startsWith("/signup")||  request.nextUrl.pathname.startsWith("/resources") || request.nextUrl.pathname.startsWith("/terms-and-condition")
   const isLandingPage = request.nextUrl.pathname === "/"
 
   if (!isLoggedIn && !isAuthPage && !isLandingPage) {

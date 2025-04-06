@@ -27,8 +27,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/outline"
 
 
-
-
 interface NewsItem {
   title: string
   link: string

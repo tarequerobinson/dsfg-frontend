@@ -1,4 +1,5 @@
 "use client"
+
 import Link from "next/link"
 import { ArrowRight, BarChart2, Lock, DollarSign, BookOpen, TrendingUp, Calendar, PieChartIcon, NewspaperIcon, LucideVibrate } from "lucide-react"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -81,7 +82,7 @@ export default function LandingPage() {
                 Sign In
               </Link>
               <Link 
-                href="/signup" 
+                href="/terms-and-condition" 
                 className="bg-gradient-to-r from-emerald-400 to-blue-500 text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
               >
                 Sign Up

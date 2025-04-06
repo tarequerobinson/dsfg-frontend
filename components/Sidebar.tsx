@@ -92,8 +92,9 @@ const Sidebar = () => {
     { href: "/news", icon: Newspaper, label: "News" },
     { href: "/alerts", icon: VibrateIcon, label: "Alerts" },
     { href: "/event-calendar", icon: Calendar, label: "Events" },
-    { href: "/profile", icon: User, label: "Profile" },
+    { href: "/user-update", icon: User, label: "Profile" },
     { href: "/risk-assessment", icon: AlertTriangle, label: "Risk Assessment" },
+    { href: "/submit-financial-info", icon: FileText, label: "Submit"}
     // { href: "/financial-summarizer", icon: FileText, label: "Summarizer" }
   ]
 

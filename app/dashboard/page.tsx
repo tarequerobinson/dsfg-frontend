@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from 'next/router'
 import AssetCard from "@/components/AssetCard"
 import AssetChart from "@/components/AssetChart"
 import AIAdvisor from "@/components/AIAdvisor"
@@ -24,6 +25,7 @@ import {
 } from "@heroicons/react/24/outline"
 import {motion, AnimatePresence } from "framer-motion"
 import AssetDistributionChart from "@/components/AssetDistributionChart"
+import { headers } from "next/headers"
 
 export default function Dashboard() {
   const { darkMode } = useTheme()
@@ -32,25 +34,70 @@ export default function Dashboard() {
     overview: true,
     assets: true
   })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Mock client portfolio data - replace with real data source
-  const [clientPortfolio] = useState({
-    realEstateValue: 123, // if this value is 0 then we assume you are not a home owner and prompt you to find out how to become one 
+  const [clientPortfolio, setClientPortfolio] = useState({
+    realEstateValue: 0, // if this value is 0 then we assume you are not a home owner and prompt you to find out how to become one 
     stockValue: 0, //if this value is 0 then we assume you have not started investing in stocks and prompt you on howo to get started 
-    totalAssets: 900000,
-    liabilities: 75000
+    totalAssets: 0,
+    liabilities: 0
   })
 
   // Calculate net worth
   const netWorth = clientPortfolio.totalAssets - clientPortfolio.liabilities
 
   // Mock data for financial standing (replace with real data)
-  const financialStanding = {
-    jamaicaPercentile: 95, // Top 5% in Jamaica
-    worldPercentile: 80, // Top 20% globally
-    jamaicaRank: 150000, // Rank among Jamaicans
-    worldRank: 1500000000, // Rank globally
-  }
+  const [financialStanding, setFinancialStanding] = useState({
+    jamaicaPercentile: 0, // Top 5% in Jamaica
+    worldPercentile: 0, // Top 20% globally
+    jamaicaRank: 0, // Rank among Jamaicans
+    worldRank: 0, // Rank globally
+  })
+
+    // Fetch data from PostgreSQL database
+    useEffect(() => {
+      const fetchDashboardData = async () => {
+        const token = localStorage.getItem("token")
+
+        if (!token){
+          console.error("No token found!");
+          return;
+        }
+
+        console.log("Sending token: ", token);
+
+        try {
+          setLoading(true)
+          const response = await fetch("http://localhost:5000/auth/finance", {
+            method: "GET", 
+            headers: {
+              "Authorization": `Bearer ${token}`, 
+              "Content-Type": "application/json",
+            }
+          })
+
+          console.log("This is response: ", response)
+  
+          if (!response.ok) {
+            throw new Error("Failed to fetch dashboard data Status: ${response.status}");
+          }
+  
+          const data = await response.json()
+          setClientPortfolio(data.clientPortfolio)
+          setFinancialStanding(data.financialStanding)
+          setError(null)
+        } catch (err) {
+          console.error("Error fetching dashboard data:", err)
+          setError("Unable to load dashboard data. Please try again later.")
+        } finally {
+          setLoading(false)
+        }
+      }
+  
+      fetchDashboardData()
+    }, [])
 
   const pages = [
     {

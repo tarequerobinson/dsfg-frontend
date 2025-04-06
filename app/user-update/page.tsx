@@ -3,24 +3,23 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { DollarSign } from "lucide-react"
-import { signIn } from "next-auth/react"
+import { UserCircle } from "lucide-react"
 import { useTheme } from "@/contexts/ThemeContext"
 
-export default function SignUp() {
+export default function UpdateProfile() {
   const router = useRouter()
   const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [phonenumber, setPhoneNumber] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
   const { darkMode } = useTheme()
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isHydrated, setIsHydrated] = useState(false)
-  const [username, setUsername] = useState("")
-  const [phonenumber, setPhoneNumber] = useState("")
 
   useEffect(() => {
     setIsHydrated(true)
@@ -28,21 +27,69 @@ export default function SignUp() {
       setMousePosition({ x: e.clientX, y: e.clientY })
     }
     window.addEventListener("mousemove", handleMouseMove)
+
+    // Fetch user data when component mounts
+    fetchUserData()
+
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [])
 
+  const fetchUserData = async () => {
+    const token = localStorage.getItem("token")
+
+    try {
+      // Replace with your actual API endpoint
+      const response = await fetch("http://localhost:5000/auth/display", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Assuming token auth
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data")
+      }
+
+      const userData = await response.json()
+
+      // Populate the form with existing user data
+      setEmail(userData.email || "")
+      setUsername(userData.username || "")
+      setPhoneNumber(userData.phonenumber || "")
+
+      // Don't set password fields with existing data for security reasons
+    } catch (err: any) {
+      setError("Failed to load user data. Please try again.")
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would handle the sign-up logic
     setError("")
     setSuccess("")
     setLoading(true)
 
+    // Create update payload - only include password if user is trying to change it
+    const updateData: any = {
+      email,
+      username,
+      phonenumber,
+    }
+
+    if (password && newPassword) {
+      updateData.currentPassword = password
+      updateData.newPassword = newPassword
+    }
+
     try {
-      const response = await fetch("http://localhost:5000/auth/signup", {
+      const response = await fetch("http://localhost:5000/auth/update", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username, phonenumber }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming token auth
+        },
+        body: JSON.stringify(updateData),
       })
 
       const data = await response.json()
@@ -51,19 +98,16 @@ export default function SignUp() {
         throw new Error(data.message || "Something went wrong")
       }
 
-      setSuccess("Account created successfully! Redirecting...")
-      setTimeout(() => {
-        router.push("/signin") // Redirect to sign-in page
-      }, 2000)
+      setSuccess("Profile updated successfully!")
+
+      // Clear password fields after successful update
+      setPassword("")
+      setNewPassword("")
     } catch (err: any) {
-      setError(err.message || "Failed to create an account")
+      setError(err.message || "Failed to update profile")
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleGoogleSignUp = () => {
-    signIn("google", { callbackUrl: "/dashboard" })
   }
 
   if (!isHydrated) return null
@@ -97,10 +141,10 @@ export default function SignUp() {
       <div className="relative z-20 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-2 rounded-xl inline-block mx-auto">
-            <DollarSign className="h-12 w-12 text-white" />
+            <UserCircle className="h-12 w-12 text-white" />
           </div>
           <h2 className={`mt-6 text-center text-3xl font-extrabold ${darkMode ? "text-zinc-50" : "text-neutral-900"}`}>
-            Create your account
+            Update Your Profile
           </h2>
         </div>
 
@@ -114,6 +158,12 @@ export default function SignUp() {
               darkMode ? "border-zinc-700/50" : "border-zinc-200/50"
             } transition-all duration-300`}
           >
+            {error && <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
+
+            {success && (
+              <div className="mb-4 p-2 bg-green-100 border border-green-400 text-green-700 rounded">{success}</div>
+            )}
+
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label
@@ -167,31 +217,6 @@ export default function SignUp() {
 
               <div>
                 <label
-                  htmlFor="password"
-                  className={`block text-sm font-medium ${darkMode ? "text-zinc-200" : "text-neutral-700"}`}
-                >
-                  Password
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm ${
-                      darkMode
-                        ? "bg-zinc-700/50 border-zinc-600 text-zinc-100"
-                        : "bg-white border-gray-300 text-neutral-900"
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
                   htmlFor="phoneNumber"
                   className={`block text-sm font-medium ${darkMode ? "text-zinc-200" : "text-neutral-700"}`}
                 >
@@ -215,66 +240,83 @@ export default function SignUp() {
                 </div>
               </div>
 
+              <div className="space-y-1">
+                <p className={`text-sm font-medium ${darkMode ? "text-zinc-200" : "text-neutral-700"}`}>
+                  Change Password (optional)
+                </p>
+                <div className="border-t border-b py-4 space-y-4 mt-2 mb-2 ${darkMode ? 'border-zinc-700' : 'border-gray-200'}">
+                  <div>
+                    <label
+                      htmlFor="current-password"
+                      className={`block text-sm font-medium ${darkMode ? "text-zinc-200" : "text-neutral-700"}`}
+                    >
+                      Current Password
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        id="current-password"
+                        name="current-password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm ${
+                          darkMode
+                            ? "bg-zinc-700/50 border-zinc-600 text-zinc-100"
+                            : "bg-white border-gray-300 text-neutral-900"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="new-password"
+                      className={`block text-sm font-medium ${darkMode ? "text-zinc-200" : "text-neutral-700"}`}
+                    >
+                      New Password
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        id="new-password"
+                        name="new-password"
+                        type="password"
+                        autoComplete="new-password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm ${
+                          darkMode
+                            ? "bg-zinc-700/50 border-zinc-600 text-zinc-100"
+                            : "bg-white border-gray-300 text-neutral-900"
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-emerald-400 to-blue-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-opacity"
+                  disabled={loading}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-emerald-400 to-blue-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-opacity disabled:opacity-50"
                 >
-                  Sign up
+                  {loading ? "Updating..." : "Update Profile"}
                 </button>
               </div>
             </form>
 
             <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className={`w-full border-t ${darkMode ? "border-zinc-600" : "border-gray-300"}`} />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className={`px-2 ${darkMode ? "bg-zinc-800/30 text-zinc-400" : "bg-white text-gray-500"}`}>
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <button
-                  onClick={handleGoogleSignUp}
-                  className={`w-full flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium ${
-                    darkMode
-                      ? "border-zinc-600 text-zinc-200 bg-zinc-700/50 hover:bg-zinc-600/50"
-                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors`}
-                >
-                  Sign up with Google
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className={`w-full border-t ${darkMode ? "border-zinc-600" : "border-gray-300"}`} />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className={`px-2 ${darkMode ? "bg-zinc-800/30 text-zinc-400" : "bg-white text-gray-500"}`}>
-                    Already have an account?
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <Link
-                  href="/signin"
-                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium ${
-                    darkMode
-                      ? "text-emerald-400 bg-zinc-700/50 hover:bg-zinc-600/50"
-                      : "text-emerald-600 bg-white hover:bg-gray-50"
-                  } transition-colors`}
-                >
-                  Sign in
-                </Link>
-              </div>
+              <button
+                onClick={() => router.back()}
+                className={`w-full flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium ${
+                  darkMode
+                    ? "border-zinc-600 text-zinc-200 bg-zinc-700/50 hover:bg-zinc-600/50"
+                    : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors`}
+              >
+                Back
+              </button>
             </div>
           </div>
         </div>
