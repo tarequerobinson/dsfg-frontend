@@ -70,7 +70,7 @@ export default function SignIn() {
           return
         }
         document.cookie = "auth=true; path=/"
-        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("token", data.token);
         router.push("/dashboard")
       } catch (error) {
         setError("Server error. Please try again later.")

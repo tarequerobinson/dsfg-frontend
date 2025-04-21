@@ -67,7 +67,7 @@ const financialServices = [
     id: 1, 
     name: "CSV Upload", 
     icon: CardIcon,
-    path: "/services/card-payments",
+    path: "/uploads",
     description: "Make purchases online and in-store with virtual and physical debit cards"
   },
   { 

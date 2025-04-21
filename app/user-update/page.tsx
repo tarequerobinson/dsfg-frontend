@@ -39,7 +39,7 @@ export default function UpdateProfile() {
 
     try {
       // Replace with your actual API endpoint
-      const response = await fetch("http://localhost:5000/auth/display", {
+      const response = await fetch("http://localhost:5000/api/auth/display", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -83,7 +83,7 @@ export default function UpdateProfile() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/auth/update", {
+      const response = await fetch("http://localhost:5000/api/auth/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
