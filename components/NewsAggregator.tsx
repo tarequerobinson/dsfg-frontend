@@ -36,7 +36,7 @@ interface NewsItem {
   creator?: string
   category?: string[]
   content?: string
-  sentiment?: "positive" | "negative" | "neutral";
+  sentiment?: "positive" | "negative" | "neutral"
 }
 
 const ITEMS_PER_PAGE = 10
@@ -260,13 +260,11 @@ const NewsAggregator = () => {
           category: Array.from(item.querySelectorAll("category")).map((cat) => cat.textContent || ""),
         }))
 
-
-
         const allNews = [...gleanerItems, ...observerItems].sort(
             (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
         )
 
-        const texts = allNews.map(article => article.description || ""); // Use description/content
+        /*const texts = allNews.map(article => article.description || "");
         const batchResponse = await fetch("http://localhost:5000/api/batch-analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -283,7 +281,7 @@ const NewsAggregator = () => {
             sentiment = result.sentiment === 1 ? "positive" : "negative";
           }
           article.sentiment = sentiment;
-        });
+        });*/
 
         setNews(allNews)
       } catch (err) {
