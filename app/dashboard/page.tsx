@@ -57,33 +57,20 @@ export default function Dashboard() {
   useEffect(() => {
     // For demo purposes, let's simulate loading data
     const fetchDashboardData = async () => {
-      /*const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token")
 
       if (!token){
         console.error("No token found!");
         return;
       }
 
-      console.log("Sending token: ", token);*/
+      console.log("Sending token: ", token);
 
       try {
         setLoading(true)
-        /*const response = await fetch("http://localhost:5000/auth/finance", {
-          method: "GET", 
-          headers: {
-            "Authorization": `Bearer ${token}`, 
-            "Content-Type": "application/json",
-          }
-        })
 
-        console.log("This is response: ", response)
-        
-        if (!response.ok) {
-          throw new Error("Failed to fetch dashboard data Status: ${response.status");
-        }
-
-        const data = await response.json()
-        //const mockStocks: StockData[] = [data.stocks]*/
+        // Simulate API call with a delay
+        await new Promise((resolve) => setTimeout(resolve, 1500))
 
         // Mock data for demonstration
         setClientPortfolio({
@@ -92,14 +79,31 @@ export default function Dashboard() {
           totalAssets: 420000,
           liabilities: 180000,
         })
-
+        
         setFinancialStanding({
           jamaicaPercentile: 95,
           worldPercentile: 80,
           jamaicaRank: 15000,
           worldRank: 400000000,
         })
+        // const response = await fetch("http://localhost:5000/api/auth/finance", {
+        //   method: "GET", 
+        //   headers: {
+        //     "Authorization": `Bearer ${token}`, 
+        //     "Content-Type": "application/json",
+        //   }
+        // })
 
+        // console.log("This is response: ", response)
+        
+        // if (!response.ok) {
+        //   throw new Error("Failed to fetch dashboard data Status: ${response.status");
+        // }
+
+        //const data = await response.json()
+        //const mockStocks: StockData[] = [data.stocks]
+
+        // Mock data for demonstration
         setError(null)
       } catch (err) {
         console.error("Error fetching dashboard data:", err)
