@@ -37,6 +37,8 @@ export default function UpdateProfile() {
   const fetchUserData = async () => {
     const token = localStorage.getItem("token")
 
+    console.log("This is the token: ", token)
+
     try {
       // Replace with your actual API endpoint
       const response = await fetch("http://localhost:5000/api/auth/display", {
@@ -61,6 +63,7 @@ export default function UpdateProfile() {
       // Don't set password fields with existing data for security reasons
     } catch (err: any) {
       setError("Failed to load user data. Please try again.")
+      console.error(err)
     }
   }
 

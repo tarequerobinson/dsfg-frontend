@@ -36,14 +36,15 @@ export default function Dashboard() {
 
   // Mock client portfolio data - replace with real data source
   const [clientPortfolio, setClientPortfolio] = useState({
-    realEstateValue: 0, // if this value is 0 then we assume you are not a home owner and prompt you to find out how to become one
-    stockValue: 0, //if this value is 0 then we assume you have not started investing in stocks and prompt you on howo to get started
-    totalAssets: 0,
-    liabilities: 0,
+    netWorth: 0.0,
+    realEstateValue: 0.0, // if this value is 0 then we assume you are not a home owner and prompt you to find out how to become one
+    //stockValue: 0, //if this value is 0 then we assume you have not started investing in stocks and prompt you on howo to get started
+    //totalAssets: 0,
+    //liabilities: 0,
   })
 
   // Calculate net worth
-  const netWorth = clientPortfolio.totalAssets - clientPortfolio.liabilities
+  //const netWorth = clientPortfolio.totalAssets - clientPortfolio.liabilities
 
   // Mock data for financial standing (replace with real data)
   const [financialStanding, setFinancialStanding] = useState({
@@ -52,6 +53,8 @@ export default function Dashboard() {
     jamaicaRank: 0, // Rank among Jamaicans
     worldRank: 0, // Rank globally
   })
+
+  const [mockStocks, setMockStocks] = useState<StockData[]>()
 
   // Fetch data from PostgreSQL database
   useEffect(() => {
@@ -74,10 +77,11 @@ export default function Dashboard() {
 
         // Mock data for demonstration
         setClientPortfolio({
+          netWorth: 100000,
           realEstateValue: 250000,
-          stockValue: 120000,
-          totalAssets: 420000,
-          liabilities: 180000,
+          //stockValue: 120000,
+          //totalAssets: 420000,
+          //liabilities: 180000,
         })
         
         setFinancialStanding({
@@ -86,28 +90,31 @@ export default function Dashboard() {
           jamaicaRank: 15000,
           worldRank: 400000000,
         })
-        // const response = await fetch("http://localhost:5000/api/auth/finance", {
-        //   method: "GET", 
-        //   headers: {
-        //     "Authorization": `Bearer ${token}`, 
-        //     "Content-Type": "application/json",
-        //   }
-        // })
 
-        // console.log("This is response: ", response)
+
+        const response = await fetch("http://localhost:5000/api/auth/finance", {
+          method: "GET", 
+          headers: {
+            "Authorization": `Bearer ${token}`, 
+            "Content-Type": "application/json",
+          }
+        })
+
+        console.log("This is response: ", response)
         
-        // if (!response.ok) {
-        //   throw new Error("Failed to fetch dashboard data Status: ${response.status");
-        // }
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data Status: ${response.status}");
+        }
 
-        //const data = await response.json()
-        //const mockStocks: StockData[] = [data.stocks]
+        const data = await response.json()
+        console.log("This is data: ", data)
+        setMockStocks(data)
 
         // Mock data for demonstration
         setError(null)
       } catch (err) {
         console.error("Error fetching dashboard data:", err)
-        setError("Unable to load dashboard data. Please try again later.")
+        //setError("Unable to load dashboard data. Please try again later.")
       } finally {
         setLoading(false)
       }
@@ -117,6 +124,8 @@ export default function Dashboard() {
   }, [])
 
   // Add this mock stock data after the useEffect hook
+
+  /*console.log("This is data: ", data)
   const mockStocks: StockData[] = [
     {
       symbol: "AAPL",
@@ -178,7 +187,7 @@ export default function Dashboard() {
       value: 2128.2,
       color: "#af52de",
     },
-  ]
+  ]*/
 
   const pages = [
     {
@@ -186,11 +195,11 @@ export default function Dashboard() {
       content: (
         <div className="space-y-6">
           <AnimatedNetWorthCard
-            netWorth={netWorth}
+            netWorth={clientPortfolio.netWorth}
             jamaicaRank={financialStanding.jamaicaRank}
             worldRank={financialStanding.worldRank}
           />
-
+{/* 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <AssetCard
               title="Total Assets"
@@ -206,9 +215,18 @@ export default function Dashboard() {
               icon={ScaleIcon}
               color="text-red-500"
             />
-          </div>
+          </div> */}
 
-          <StockSwiper stocks={mockStocks} />
+          {mockStocks && mockStocks.length > 0 ? (
+            <StockSwiper stocks={mockStocks} />
+          ) : (
+            <div className="bg-white dark:bg-dark-surface p-4 rounded-xl shadow">
+              <h3 className="text-lg font-medium mb-2">Your Stock Portfolio</h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                No stocks in your portfolio yet. When you add stocks, they'll appear here.
+              </p>
+            </div>
+          )}
         </div>
       ),
     },

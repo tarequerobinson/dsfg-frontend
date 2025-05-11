@@ -55,11 +55,9 @@ export default function StockCard({ stock, index }: StockCardProps) {
               isPositive ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"
             }`}
           >
-            {isPositive ? <ArrowUpIcon className="h-3 w-3" /> : <ArrowDownIcon className="h-3 w-3" />}
+            {/*isPositive ? <ArrowUpIcon className="h-3 w-3" /> : <ArrowDownIcon className="h-3 w-3" />*/}
             <span className="text-xs font-medium">
               {isPositive ? "+" : ""}
-              {stock.change.toFixed(2)} ({isPositive ? "+" : ""}
-              {stock.changePercent.toFixed(2)}%)
             </span>
           </div>
         </div>

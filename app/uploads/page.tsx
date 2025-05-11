@@ -4,9 +4,11 @@ import type React from "react"
 
 import { useState } from "react"
 import { UploadButton } from "@/components/UploadButtons"
+import { useRouter } from "next/navigation"
 
 export default function Home() {
   const [uploading, setUploading] = useState(false)
+  const router = useRouter()
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -32,13 +34,23 @@ export default function Home() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        console.error("Upload failed:", error)
-        alert(`Upload failed: ${error.error}`)
+        let errorMessage = "Unkown error occurred"
+        try{
+          const error = await response.json()
+          errorMessage = error.error || JSON.stringify(error)
+        } catch (e) {
+          console.error("Failed to parse error response", e)
+        }
+        console.error("Upload failed: ", errorMessage)
+        alert('Upload failed: ${errorMessage}')
+        // const error = await response.json()
+        // console.error("Upload failed:", error)
+        // alert(`Upload failed: ${error.error}`)
       } else {
         const result = await response.json()
         console.log("Upload successful:", result)
         alert(result.message)
+        router.push("/dashboard")
       }
 
     } catch (error) {
