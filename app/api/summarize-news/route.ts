@@ -1,8 +1,8 @@
 // app/api/summarize-news/route.ts
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { NextResponse } from "next/server"
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+//REMEMBER TO REMOVE THE API KEY AND PUT: process.env.GEMINI_API_KEY!
+const genAI = new GoogleGenerativeAI("AIzaSyA4lp0lnvdIrTibU4Pn067dLi10ZIMsghI")
 const SUMMARY_CACHE = new Map()
 
 export async function POST(req: Request) {

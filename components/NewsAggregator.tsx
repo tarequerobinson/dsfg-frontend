@@ -31,12 +31,12 @@ interface NewsItem {
   title: string
   link: string
   pubDate: string
+  sentiment?: "positive" | "negative" | "neutral"
   source: "Gleaner" | "Observer"
   description?: string
   creator?: string
   category?: string[]
   content?: string
-  sentiment?: "positive" | "negative" | "neutral"
 }
 
 const ITEMS_PER_PAGE = 10
@@ -223,6 +223,47 @@ const NewsAggregator = () => {
 
   const totalPages = Math.ceil(filteredNews.length / ITEMS_PER_PAGE)
 
+
+  const POSITIVE_FINANCE_KEYWORDS = [
+    'bullish', 'growth', 'profit', 'surge', 'gain', 'rise', 'increase', 'boom',
+    'dividend', 'upswing', 'outperform', 'buy', 'strong', 'record', 'expansion',
+    'recovery', 'soar', 'climb', 'rally', 'positive', 'beat', 'exceed', 'raise',
+    'upgrade', 'optimistic', 'robust'
+  ];
+
+  const NEGATIVE_FINANCE_KEYWORDS = [
+    'bearish', 'decline', 'loss', 'plunge', 'drop', 'fall', 'decrease', 'slump',
+    'default', 'downgrade', 'underperform', 'sell', 'weak', 'collapse', 'recession',
+    'volatile', 'risk', 'warn', 'cut', 'reduce', 'downsize', 'layoff', 'debt',
+    'bankrupt', 'crisis', 'correct', 'dip', 'slide', 'shrink', 'contract', 'miss'
+  ];
+
+  const analyzeSentiment = (text: string) => {
+    const words = text.toLowerCase().split(/\W+/);
+
+    const positiveMatches = words.filter(word =>
+        POSITIVE_FINANCE_KEYWORDS.includes(word)
+    ).length;
+
+    const negativeMatches = words.filter(word =>
+        NEGATIVE_FINANCE_KEYWORDS.includes(word)
+    ).length;
+
+    // Calculate ratios to handle varying text lengths
+    const totalKeywords = positiveMatches + negativeMatches;
+    const positiveRatio = positiveMatches / totalKeywords;
+    const negativeRatio = negativeMatches / totalKeywords;
+
+    if (totalKeywords === 0) return 'neutral';
+
+    // Only consider clear sentiment if ratio exceeds 60%
+    if (positiveRatio > 0.6) return 'positive';
+    if (negativeRatio > 0.6) return 'negative';
+
+    return 'neutral';
+  };
+
+
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -248,6 +289,7 @@ const NewsAggregator = () => {
           creator: item.querySelector("dc\\:creator")?.textContent || "",
           source: "Gleaner" as const,
           category: Array.from(item.querySelectorAll("category")).map((cat) => cat.textContent || ""),
+          sentiment: item.querySelector("sentiment")?.textContent,
         }))
 
         const observerItems = Array.from(observerXML.querySelectorAll("item")).map((item) => ({
@@ -258,30 +300,48 @@ const NewsAggregator = () => {
           creator: item.querySelector("dc\\:creator")?.textContent || "",
           source: "Observer" as const,
           category: Array.from(item.querySelectorAll("category")).map((cat) => cat.textContent || ""),
+          sentiment: item.querySelector("sentiment")?.textContent,
         }))
 
         const allNews = [...gleanerItems, ...observerItems].sort(
             (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
         )
 
-        /*const texts = allNews.map(article => article.description || "");
-        const batchResponse = await fetch("http://localhost:5000/api/batch-analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: texts.map((text, idx) => ({ id: idx, text })) }),
-        });
 
-        const sentimentResults = await batchResponse.json();
+        const texts = allNews.map((article, idx) => ({
+          id: idx,
+          text: `${article.title}. ${article.description || ""}`
+        }));
+
+        const PAGE_SIZE = 5; // Number of articles per API call
+        const totalPages = Math.ceil(texts.length / PAGE_SIZE);
+        const sentimentResults = [];
+
+        for (let page = 0; page < totalPages; page++) {
+          const start = page * PAGE_SIZE;
+          const end = start + PAGE_SIZE;
+          const batch = texts.slice(start, end);
+
+          const batchResponse = await fetch("http://localhost:5000/api/batch-analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: texts.map((text, idx) => ({ id: idx, text })) }),
+          });
+
+        if (!batchResponse.ok) {
+          throw new Error(`Sentiment API error: ${batchResponse.status}`);
+        }
+          const pageResults = await batchResponse.json();
+          sentimentResults.push(...pageResults.results);
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
 
         allNews.forEach((article, index) => {
-          const result = sentimentResults.results.find(r => r.id === index);
-          let sentiment: NewsItem["sentiment"] = "neutral";
-
-          if (result.confidence >= 0.6) {
-            sentiment = result.sentiment === 1 ? "positive" : "negative";
-          }
-          article.sentiment = sentiment;
-        });*/
+          const content = `${article.title} ${article.description || ""}`.toLowerCase();
+          article.sentiment = analyzeSentiment(content);
+        });
 
         setNews(allNews)
       } catch (err) {
@@ -572,10 +632,10 @@ const NewsAggregator = () => {
                 {paginatedNews.map((item, index) => (
                     <div
                         key={index}
-                        className={`p-4 rounded-lg border hover:border-blue-500 transition-all 
+                        className={`p-4 rounded-lg border-4 hover:border-blue-500 transition-all 
                     ${item.sentiment === 'positive' ? 'border-green-500' :
                             item.sentiment === 'negative' ? 'border-red-500' :
-                                'border-blue-500'} 
+                                'border-yellow-500'} 
                     dark:border-dark-border bg-white dark:bg-dark-surface cursor-pointer`}
                         onClick={() => handleArticleClick(item)}
                     >
