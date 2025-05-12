@@ -484,7 +484,24 @@ const NewsAggregator = () => {
                 </div>
             ) : (
                 <div className="prose max-w-none dark:prose-invert">
-                  <div dangerouslySetInnerHTML={{ __html: selectedArticle.content || "" }} />
+                  {/* Add sentiment indicator */}
+                  {selectedArticle?.sentiment && (
+                      <div className={`p-3 rounded-lg mb-4 ${
+                          selectedArticle.sentiment === 'positive'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                              : selectedArticle.sentiment === 'negative'
+                                  ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
+                      }`}>
+                        <strong>
+                          {selectedArticle.sentiment === 'positive' && "Green Sentiment: Positive"}
+                          {selectedArticle.sentiment === 'negative' && "Red Sentiment: Negative"}
+                          {selectedArticle.sentiment === 'neutral' && "Yellow Sentiment: Neutral"}
+                        </strong>
+                      </div>
+                  )}
+
+                  <div dangerouslySetInnerHTML={{ __html: selectedArticle?.content || "" }} />
                   {selectedArticle.content?.includes("You can read this article at:") && (
                       <div className="mt-4 p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg">
                         <p className="text-neutral-600 dark:text-dark-text">{selectedArticle.content}</p>
