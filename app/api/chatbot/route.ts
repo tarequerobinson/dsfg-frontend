@@ -95,6 +95,28 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
+
+    // Fetch portfolio data
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "")
+    let portfolioData = { netWorth: 0, assets: [] }
+    
+    if (token) {
+      try {
+        const portfolioResponse = await fetch("http://localhost:5000/api/auth/finance", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+        })
+        
+        if (portfolioResponse.ok) {
+          portfolioData = await portfolioResponse.json()
+        }
+      } catch (error) {
+        console.error("Error fetching portfolio data:", error)
+      }
+    }
     
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
     
@@ -109,18 +131,22 @@ export async function POST(req: Request) {
     if (pdfContext) {
       prompt = `You are a financial analyst assistant specializing in Jamaican finance.
       
+      User's Portfolio:
+      Net Worth: JMD ${portfolioData.netWorth.toLocaleString()}
+      Assets: ${portfolioData.assets?.map(asset => `${asset.name}: ${asset.quantity} shares, Value: JMD ${asset.value.toLocaleString()}`).join(", ") || "No assets"}
+      
       Document Context:
       Summary: ${pdfContext.summary}
       Topics: ${pdfContext.topics.join(", ")}
       
-      Using both your general knowledge of Jamaican finance AND the specific context from the document above when relevant, please answer:
+      Using both your general knowledge of Jamaican finance, the user's portfolio data, AND the specific context from the document above when relevant, please answer:
       
       ${message}
       
       Remember to:
       1. Use JMD currency when discussing amounts
       2. Reference specific Jamaican financial institutions and markets when applicable
-      3. Consider both the document context and broader Jamaican financial landscape
+      3. Consider the user's current portfolio, document context, and broader Jamaican financial landscape
       4. Be specific and actionable in your advice
       5. Never give an incomplete response
       6. Never give a black and white answer for any open ended questions because most things are dependent on the variables relevant to the person asking so ask clarifying questions to get a better idea as to how to respond properly. Do not do this excessively as it may annoy the client so please only do this when necessary
@@ -134,11 +160,15 @@ export async function POST(req: Request) {
     } else {
       prompt = `You are DSFG's AI Financial Advisor specialized in Jamaican finance.
       
+      User's Portfolio:
+      Net Worth: JMD ${portfolioData.netWorth.toLocaleString()}
+      Assets: ${portfolioData.assets?.map(asset => `${asset.name}: ${asset.quantity} shares, Value: JMD ${asset.value.toLocaleString()}`).join(", ") || "No assets"}
+      
       When answering, always:
       1. Focus on the Jamaican financial context
       2. Use JMD currency
       3. Reference specific Jamaican financial institutions, markets, and regulations
-      4. Provide actionable advice considering the local economic environment
+      4. Provide actionable advice considering the user's portfolio and local economic environment
       5. Include relevant local market rates, fees, and costs when applicable
       6. Never give an incomplete response
       7. Never give a black and white answer for any open ended questions because most things are dependent on the variables relevant to the person asking so ask clarifying questions to get a better idea as to how to respond properly
