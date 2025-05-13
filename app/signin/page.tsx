@@ -218,16 +218,7 @@ export default function SignIn() {
               </div>
 
               <div className="mt-6">
-                <button
-                  onClick={handleGoogleSignIn}
-                  className={`w-full flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium ${
-                    darkMode
-                      ? "border-zinc-600 text-zinc-200 bg-zinc-700/50 hover:bg-zinc-600/50"
-                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors`}
-                >
-                  Sign in with Google
-                </button>
+
               </div>
             </div>
 
