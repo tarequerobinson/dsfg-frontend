@@ -31,6 +31,7 @@ interface NewsItem {
   title: string
   link: string
   pubDate: string
+  sentiment?: "positive" | "negative" | "neutral"
   source: "Gleaner" | "Observer"
   description?: string
   creator?: string
@@ -52,9 +53,9 @@ const NewsAggregator = () => {
   const [articleLoading, setArticleLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [isPlaying, setIsPlaying] = useState(false);
-const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
-const [audioError, setAudioError] = useState<string | null>(null);
-const [isLoading, setIsLoading] = useState(false);
+  const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
 
 
@@ -103,13 +104,13 @@ const [isLoading, setIsLoading] = useState(false);
       setIsPlaying(false);
       return;
     }
-  
+
     setIsLoading(true);
     setAudioError(null);
-  
+
     // Create an AbortController for the fetch request
     const abortController = new AbortController();
-  
+
     try {
       // Clean up previous audio if it exists
       if (audioRef) {
@@ -117,35 +118,35 @@ const [isLoading, setIsLoading] = useState(false);
         URL.revokeObjectURL(audioRef.src);
         setAudioRef(null);
       }
-  
+
       if (!summary.trim()) {
         throw new Error('No text available to play');
       }
-  
+
       const response = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: summary }),
         signal: abortController.signal
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to generate audio');
       }
-  
+
       const contentType = response.headers.get('Content-Type');
       if (!contentType?.includes('audio/mpeg')) {
         throw new Error('Invalid audio format received');
       }
-  
+
       const blob = await response.blob();
       if (blob.size === 0) {
         throw new Error('Received empty audio data');
       }
-  
+
       const audio = new Audio();
-      
+
       // Set up event listeners before setting the source
       const audioLoadPromise = new Promise((resolve, reject) => {
         audio.addEventListener('loadeddata', resolve, { once: true });
@@ -154,30 +155,31 @@ const [isLoading, setIsLoading] = useState(false);
           reject(new Error(error ? `Audio error: ${error.message}` : 'Error loading audio'));
         }, { once: true });
       });
-  
+
       // Create object URL and set it as the audio source
       const audioUrl = URL.createObjectURL(blob);
       audio.src = audioUrl;
-  
+
       // Wait for audio to load
       await audioLoadPromise;
-  
+
       // Set up playback event listeners
       audio.addEventListener('ended', () => {
         setIsPlaying(false);
         // Keep the URL for potential replay
       });
-  
+
       audio.addEventListener('pause', () => {
         setIsPlaying(false);
       });
-  
+
       // Start playback
       await audio.play();
       setAudioRef(audio);
       setIsPlaying(true);
-  
+
     } catch (error) {
+      // @ts-ignore
       if (error.name === 'AbortError') {
         console.log('Audio request was cancelled');
       } else {
@@ -188,13 +190,13 @@ const [isLoading, setIsLoading] = useState(false);
     } finally {
       setIsLoading(false);
     }
-  
+
     // Return cleanup function
     return () => {
       abortController.abort();
     };
   };
-  
+
   // Add cleanup effect
   useEffect(() => {
     return () => {
@@ -204,16 +206,16 @@ const [isLoading, setIsLoading] = useState(false);
       }
     };
   }, [audioRef]);
-      
+
 
 
 
 
   const filteredNews = news.filter((item) => {
     const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.creator?.toLowerCase().includes(searchQuery.toLowerCase())
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.creator?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesSource = selectedSource === "all" || item.source === selectedSource
     return matchesSearch && matchesSource
   })
@@ -221,6 +223,47 @@ const [isLoading, setIsLoading] = useState(false);
   const paginatedNews = filteredNews.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
   const totalPages = Math.ceil(filteredNews.length / ITEMS_PER_PAGE)
+
+
+  const POSITIVE_FINANCE_KEYWORDS = [
+    'bullish', 'growth', 'profit', 'surge', 'gain', 'rise', 'increase', 'boom',
+    'dividend', 'upswing', 'outperform', 'buy', 'strong', 'record', 'expansion',
+    'recovery', 'soar', 'climb', 'rally', 'positive', 'beat', 'exceed', 'raise',
+    'upgrade', 'optimistic', 'robust'
+  ];
+
+  const NEGATIVE_FINANCE_KEYWORDS = [
+    'bearish', 'decline', 'loss', 'plunge', 'drop', 'fall', 'decrease', 'slump',
+    'default', 'downgrade', 'underperform', 'sell', 'weak', 'collapse', 'recession',
+    'volatile', 'risk', 'warn', 'cut', 'reduce', 'downsize', 'layoff', 'debt',
+    'bankrupt', 'crisis', 'correct', 'dip', 'slide', 'shrink', 'contract', 'miss'
+  ];
+
+  const analyzeSentiment = (text: string) => {
+    const words = text.toLowerCase().split(/\W+/);
+
+    const positiveMatches = words.filter(word =>
+        POSITIVE_FINANCE_KEYWORDS.includes(word)
+    ).length;
+
+    const negativeMatches = words.filter(word =>
+        NEGATIVE_FINANCE_KEYWORDS.includes(word)
+    ).length;
+
+    // Calculate ratios to handle varying text lengths
+    const totalKeywords = positiveMatches + negativeMatches;
+    const positiveRatio = positiveMatches / totalKeywords;
+    const negativeRatio = negativeMatches / totalKeywords;
+
+    if (totalKeywords === 0) return 'neutral';
+
+    // Only consider clear sentiment if ratio exceeds 60%
+    if (positiveRatio > 0.6) return 'positive';
+    if (negativeRatio > 0.6) return 'negative';
+
+    return 'neutral';
+  };
+
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -247,6 +290,7 @@ const [isLoading, setIsLoading] = useState(false);
           creator: item.querySelector("dc\\:creator")?.textContent || "",
           source: "Gleaner" as const,
           category: Array.from(item.querySelectorAll("category")).map((cat) => cat.textContent || ""),
+          sentiment: item.querySelector("sentiment")?.textContent,
         }))
 
         const observerItems = Array.from(observerXML.querySelectorAll("item")).map((item) => ({
@@ -257,12 +301,50 @@ const [isLoading, setIsLoading] = useState(false);
           creator: item.querySelector("dc\\:creator")?.textContent || "",
           source: "Observer" as const,
           category: Array.from(item.querySelectorAll("category")).map((cat) => cat.textContent || ""),
+          sentiment: item.querySelector("sentiment")?.textContent,
         }))
 
         const allNews = [...gleanerItems, ...observerItems].sort(
-          (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
+            (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
         )
 
+
+        const texts = allNews.map((article, idx) => ({
+          id: idx,
+          text: `${article.title}. ${article.description || ""}`
+        }));
+
+        const PAGE_SIZE = 5; // Number of articles per API call
+        const totalPages = Math.ceil(texts.length / PAGE_SIZE);
+        const sentimentResults = [];
+
+        for (let page = 0; page < totalPages; page++) {
+          const start = page * PAGE_SIZE;
+          const end = start + PAGE_SIZE;
+          const batch = texts.slice(start, end);
+
+          const batchResponse = await fetch("http://localhost:5000/api/batch-analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: texts.map((text, idx) => ({ id: idx, text })) }),
+          });
+
+        if (!batchResponse.ok) {
+          throw new Error(`Sentiment API error: ${batchResponse.status}`);
+        }
+          const pageResults = await batchResponse.json();
+          sentimentResults.push(...pageResults.results);
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+
+        allNews.forEach((article, index) => {
+          const content = `${article.title} ${article.description || ""}`.toLowerCase();
+          article.sentiment = analyzeSentiment(content);
+        });
+
+        // @ts-ignore
         setNews(allNews)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch news")
@@ -275,357 +357,379 @@ const [isLoading, setIsLoading] = useState(false);
   }, [])
 
 // Add these to your component
-const [lastSummaryTime, setLastSummaryTime] = useState<number>(0)
-const SUMMARY_COOLDOWN = 30000 // 30 seconds
+  const [lastSummaryTime, setLastSummaryTime] = useState<number>(0)
+  const SUMMARY_COOLDOWN = 30000 // 30 seconds
 
-useEffect(() => {
-  const generateAISummary = async () => {
-    if (filteredNews.length === 0 || 
-        Date.now() - lastSummaryTime < SUMMARY_COOLDOWN ||
-        summaryLoading
-    ) return
+  useEffect(() => {
+    const generateAISummary = async () => {
+      if (filteredNews.length === 0 ||
+          Date.now() - lastSummaryTime < SUMMARY_COOLDOWN ||
+          summaryLoading
+      ) return
 
-    try {
-      setSummaryLoading(true)
-      const topArticles = filteredNews.slice(0, 50)
+      try {
+        setSummaryLoading(true)
+        const topArticles = filteredNews.slice(0, 50)
 
-      const response = await fetch("/api/summarize-news", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          articles: topArticles,
-          prompt: `As a Jamaican financial analyst, create a 150-word markdown brief with:
+        const response = await fetch("/api/summarize-news", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            articles: topArticles,
+            prompt: `As a Jamaican financial analyst, create a 150-word markdown brief with:
           1. **Jamaica Financial Brief** header with date
           2. Weather metaphor reflecting economic climate
           3. **Key Developments** with <span class="text-green-500">[Positive]</span>/<span class="text-orange-500">[Watch]</span>
           4. **Your Money Impact** section
           5. **JSE Spotlight** with ↗︎/↘︎ symbols
           Use only span elements for coloring, no other HTML.`
-        }),
-      })
+          }),
+        })
 
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Summary service unavailable")
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || "Summary service unavailable")
+        }
+
+        const data = await response.json()
+        setSummary(data.summary)
+        setLastSummaryTime(Date.now())
+      } catch (error) {
+        console.error("Summary error:", error)
+        setSummary(error instanceof Error ? error.message : "Unable to generate summary")
+        // Queue retry after cooldown
+        setTimeout(() => setLastSummaryTime(0), SUMMARY_COOLDOWN)
+      } finally {
+        setSummaryLoading(false)
       }
-
-      const data = await response.json()
-      setSummary(data.summary)
-      setLastSummaryTime(Date.now())
-    } catch (error) {
-      console.error("Summary error:", error)
-      setSummary(error instanceof Error ? error.message : "Unable to generate summary")
-      // Queue retry after cooldown
-      setTimeout(() => setLastSummaryTime(0), SUMMARY_COOLDOWN)
-    } finally {
-      setSummaryLoading(false)
     }
-  }
 
-  const debouncedSummary = setTimeout(generateAISummary, 2000)
-  return () => clearTimeout(debouncedSummary)
-}, [filteredNews, lastSummaryTime])
+    const debouncedSummary = setTimeout(generateAISummary, 2000)
+    return () => clearTimeout(debouncedSummary)
+  }, [filteredNews, lastSummaryTime])
 
-const markdownComponents = {
-  a: ({ node, ...props }: any) => (
-    <a 
-      {...props} 
-      className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-      target="_blank" 
-      rel="noopener noreferrer"
-    />
-  ),
-  h3: ({ node, ...props }: any) => (
-    <h3 {...props} className="text-xl font-semibold mt-4 mb-2" />
-  ),
-  ul: ({ node, ...props }: any) => (
-    <ul {...props} className="list-disc pl-6 space-y-1" />
-  ),
-  ol: ({ node, ...props }: any) => (
-    <ol {...props} className="list-decimal pl-6 space-y-1" />
-  ),
-  span: ({ node, ...props }: any) => {
-    const colorMatch = props.className?.match(/text-(.+)/)
-    return colorMatch ? (
-      <span className={`text-${colorMatch[1]} dark:text-${colorMatch[1]}-300`}>
+  const markdownComponents = {
+    a: ({ node, ...props }: any) => (
+        <a
+            {...props}
+            className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+            target="_blank"
+            rel="noopener noreferrer"
+        />
+    ),
+    h3: ({ node, ...props }: any) => (
+        <h3 {...props} className="text-xl font-semibold mt-4 mb-2" />
+    ),
+    ul: ({ node, ...props }: any) => (
+        <ul {...props} className="list-disc pl-6 space-y-1" />
+    ),
+    ol: ({ node, ...props }: any) => (
+        <ol {...props} className="list-decimal pl-6 space-y-1" />
+    ),
+    span: ({ node, ...props }: any) => {
+      const colorMatch = props.className?.match(/text-(.+)/)
+      return colorMatch ? (
+          <span className={`text-${colorMatch[1]} dark:text-${colorMatch[1]}-300`}>
         {props.children}
       </span>
-    ) : (
-      <span {...props} />
+      ) : (
+          <span {...props} />
+      )
+    },
+    strong: ({ node, ...props }: any) => (
+        <strong className="font-semibold text-green-600 dark:text-green-400" {...props} />
+    ),
+    em: ({ node, ...props }: any) => (
+        <em className="italic text-yellow-600 dark:text-yellow-400" {...props} />
     )
-  },
-  strong: ({ node, ...props }: any) => (
-    <strong className="font-semibold text-green-600 dark:text-green-400" {...props} />
-  ),
-  em: ({ node, ...props }: any) => (
-    <em className="italic text-yellow-600 dark:text-yellow-400" {...props} />
-  )
-}
+  }
 
 
   if (selectedArticle) {
     return (
-      <Card className="max-w-4xl mx-auto bg-white dark:bg-dark-bg border-neutral-200 dark:border-dark-border">
-        <CardHeader className="space-y-4">
-          <button
-            onClick={() => setSelectedArticle(null)}
-            className="flex items-center text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            <ArrowLeftIcon className="h-5 w-5 mr-1" />
-            Back to news
-          </button>
-          <CardTitle className="text-2xl font-bold text-neutral-900 dark:text-dark-text">
-            {selectedArticle.title}
-          </CardTitle>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-neutral-600 dark:text-dark-text">
-            <div className="flex items-center space-x-3 mb-2 sm:mb-0">
+        <Card className="max-w-4xl mx-auto bg-white dark:bg-dark-bg border-neutral-200 dark:border-dark-border">
+          <CardHeader className="space-y-4">
+            <button
+                onClick={() => setSelectedArticle(null)}
+                className="flex items-center text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              <ArrowLeftIcon className="h-5 w-5 mr-1" />
+              Back to news
+            </button>
+            <CardTitle className="text-2xl font-bold text-neutral-900 dark:text-dark-text">
+              {selectedArticle.title}
+            </CardTitle>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-neutral-600 dark:text-dark-text">
+              <div className="flex items-center space-x-3 mb-2 sm:mb-0">
               <span className="inline-flex items-center">
                 <NewspaperIcon className="h-4 w-4 mr-1" />
                 {selectedArticle.source}
               </span>
-              {selectedArticle.creator && (
-                <span className="inline-flex items-center">
+                {selectedArticle.creator && (
+                    <span className="inline-flex items-center">
                   <UserIcon className="h-4 w-4 mr-1" />
-                  {selectedArticle.creator}
+                      {selectedArticle.creator}
                 </span>
-              )}
+                )}
+              </div>
+              <div className="flex items-center space-x-2">
+                <ClockIcon className="h-4 w-4" />
+                <span>{selectedArticle.pubDate}</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <ClockIcon className="h-4 w-4" />
-              <span>{selectedArticle.pubDate}</span>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {articleLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400" />
-            </div>
-          ) : (
-            <div className="prose max-w-none dark:prose-invert">
-              <div dangerouslySetInnerHTML={{ __html: selectedArticle.content || "" }} />
-              {selectedArticle.content?.includes("You can read this article at:") && (
-                <div className="mt-4 p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg">
-                  <p className="text-neutral-600 dark:text-dark-text">{selectedArticle.content}</p>
-                  <a
-                    href={selectedArticle.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 mt-2"
-                  >
-                    <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-1" />
-                    Open in new tab
-                  </a>
+          </CardHeader>
+          <CardContent>
+            {articleLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400" />
                 </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            ) : (
+                <div className="prose max-w-none dark:prose-invert">
+                  {/* Add sentiment indicator */}
+                  {selectedArticle?.sentiment && (
+                      <div className={`p-3 rounded-lg mb-4 ${
+                          selectedArticle.sentiment === 'positive'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                              : selectedArticle.sentiment === 'negative'
+                                  ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
+                      }`}>
+                        <strong>
+                          {selectedArticle.sentiment === 'positive' && "Green Sentiment: Positive"}
+                          {selectedArticle.sentiment === 'negative' && "Red Sentiment: Negative"}
+                          {selectedArticle.sentiment === 'neutral' && "Yellow Sentiment: Neutral"}
+                        </strong>
+                      </div>
+                  )}
+
+                  <div dangerouslySetInnerHTML={{ __html: selectedArticle?.content || "" }} />
+                  {selectedArticle.content?.includes("You can read this article at:") && (
+                      <div className="mt-4 p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg">
+                        <p className="text-neutral-600 dark:text-dark-text">{selectedArticle.content}</p>
+                        <a
+                            href={selectedArticle.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 mt-2"
+                        >
+                          <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-1" />
+                          Open in new tab
+                        </a>
+                      </div>
+                  )}
+                </div>
+            )}
+          </CardContent>
+        </Card>
     )
   }
 
+  // @ts-ignore
+  // @ts-ignore
   return (
-    <Card className="max-w-4xl mx-auto bg-white dark:bg-dark-bg border-neutral-200 dark:border-dark-border">
-      <CardHeader className="space-y-6">
-        <CardTitle className="text-2xl font-bold text-neutral-900 dark:text-dark-text">
-          Business News (Jamaica)
-        </CardTitle>
+      <Card className="max-w-4xl mx-auto bg-white dark:bg-dark-bg border-neutral-200 dark:border-dark-border">
+        <CardHeader className="space-y-6">
+          <CardTitle className="text-2xl font-bold text-neutral-900 dark:text-dark-text">
+            Business News (Jamaica)
+          </CardTitle>
 
-        <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-          <div className="relative flex-1">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400 dark:text-neutral-500" />
-            <input
-              type="text"
-              placeholder="Search news..."
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
+          <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400 dark:text-neutral-500" />
+              <input
+                  type="text"
+                  placeholder="Search news..."
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
                        bg-white dark:bg-dark-surface border-neutral-200 dark:border-dark-border text-neutral-900 dark:text-dark-text
                        placeholder-neutral-400 dark:placeholder-neutral-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
 
-          <div className="flex space-x-2">
-            {(["all", "Gleaner", "Observer"] as const).map((source) => (
-              <button
-                key={source}
-                onClick={() => setSelectedSource(source)}
-                className={`px-4 py-2 rounded-lg text-sm transition-colors
+            <div className="flex space-x-2">
+              {(["all", "Gleaner", "Observer"] as const).map((source) => (
+                  <button
+                      key={source}
+                      onClick={() => setSelectedSource(source)}
+                      className={`px-4 py-2 rounded-lg text-sm transition-colors
                   ${
-                    selectedSource === source
-                      ? "bg-blue-500 text-white dark:bg-blue-600"
-                      : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-dark-surface dark:text-dark-text dark:hover:bg-neutral-700"
-                  }`}
-              >
-                {source === "all" ? "All Sources" : source}
-              </button>
-            ))}
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400" />
-          </div>
-        ) : error ? (
-          <div className="text-center py-12 text-red-500 dark:text-red-400">
-            <p>{error}</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-  {filteredNews.length > 0 && (
-
-
-    <div className="p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg border border-neutral-200 dark:border-dark-border">
-      <h3 className="text-lg font-semibold mb-2 flex items-center text-neutral-900 dark:text-dark-text">
-        <ChartBarIcon className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
-        News Summary
-        {summaryLoading && (
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 dark:border-blue-400 ml-2" />
-        )}
-      </h3>
-
-
-
-
-      <div className="flex items-center gap-2">
-    {audioError && (
-      <span className="text-sm text-red-500">{audioError}</span>
-    )}
-    <button
-      onClick={handleTextToSpeech}
-      disabled={isLoading}
-      className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50"
-      title={isPlaying ? "Stop" : "Play summary"}
-    >
-      {isLoading ? (
-        <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
-      ) : isPlaying ? (
-        <SpeakerXMarkIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-      ) : (
-        <SpeakerWaveIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-      )}
-    </button>
-  </div>
-
-      {summary ? (
-        <div className="text-neutral-600 dark:text-dark-text prose dark:prose-invert max-w-none">
-<ReactMarkdown
-  remarkPlugins={[remarkGfm]}
-  rehypePlugins={[
-    rehypeRaw, 
-    [rehypeSanitize, {
-      tagNames: ['span'],
-      attributes: {
-        span: ['className']
-      }
-    }]
-  ]}
-  components={markdownComponents}
-  urlTransform={(uri) => {
-    try {
-      const url = new URL(uri)
-      return url.protocol === 'http:' || url.protocol === 'https:' ? uri : ''
-    } catch {
-      return ''
-    }
-  }}
->
-  {summary}
-</ReactMarkdown>
-        </div>
-      ) : (
-        <p className="text-neutral-500 dark:text-neutral-400">
-          Analysis unavailable at the moment
-        </p>
-      )}
-    </div>
-
-
-
-
-  )}
-            {paginatedNews.map((item, index) => (
-              <div
-                key={index}
-                className="p-4 rounded-lg border hover:border-blue-500 dark:hover:border-blue-400 transition-all
-                         bg-white dark:bg-dark-surface border-neutral-200 dark:border-dark-border cursor-pointer"
-                onClick={() => handleArticleClick(item)}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2 mb-2 sm:mb-0">
-                    <span
-                      className={`inline-flex items-center text-sm font-medium
-                      ${
-                        item.source === "Gleaner"
-                          ? "text-blue-600 dark:text-blue-400"
-                          : "text-orange-600 dark:text-orange-400"
+                          selectedSource === source
+                              ? "bg-blue-500 text-white dark:bg-blue-600"
+                              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-dark-surface dark:text-dark-text dark:hover:bg-neutral-700"
                       }`}
+                  >
+                    {source === "all" ? "All Sources" : source}
+                  </button>
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400" />
+              </div>
+          ) : error ? (
+              <div className="text-center py-12 text-red-500 dark:text-red-400">
+                <p>{error}</p>
+              </div>
+          ) : (
+              <div className="space-y-6">
+                {filteredNews.length > 0 && (
+
+
+                    <div className="p-4 bg-neutral-50 dark:bg-dark-surface rounded-lg border border-neutral-200 dark:border-dark-border">
+                      <h3 className="text-lg font-semibold mb-2 flex items-center text-neutral-900 dark:text-dark-text">
+                        <ChartBarIcon className="h-5 w-5 mr-2 text-blue-500 dark:text-blue-400" />
+                        News Summary
+                        {summaryLoading && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 dark:border-blue-400 ml-2" />
+                        )}
+                      </h3>
+
+
+
+
+                      <div className="flex items-center gap-2">
+                        {audioError && (
+                            <span className="text-sm text-red-500">{audioError}</span>
+                        )}
+                        <button
+                            onClick={handleTextToSpeech}
+                            disabled={isLoading}
+                            className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50"
+                            title={isPlaying ? "Stop" : "Play summary"}
+                        >
+                          {isLoading ? (
+                              <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
+                          ) : isPlaying ? (
+                              <SpeakerXMarkIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                          ) : (
+                              <SpeakerWaveIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                          )}
+                        </button>
+                      </div>
+
+                      {summary ? (
+                          <div className="text-neutral-600 dark:text-dark-text prose dark:prose-invert max-w-none">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[
+                                  rehypeRaw,
+                                  [rehypeSanitize, {
+                                    tagNames: ['span'],
+                                    attributes: {
+                                      span: ['className']
+                                    }
+                                  }]
+                                ]}
+                                components={markdownComponents}
+                                urlTransform={(uri) => {
+                                  try {
+                                    const url = new URL(uri)
+                                    return url.protocol === 'http:' || url.protocol === 'https:' ? uri : ''
+                                  } catch {
+                                    return ''
+                                  }
+                                }}
+                            >
+                              {summary}
+                            </ReactMarkdown>
+                          </div>
+                      ) : (
+                          <p className="text-neutral-500 dark:text-neutral-400">
+                            Analysis unavailable at the moment
+                          </p>
+                      )}
+                    </div>
+
+
+
+
+                )}
+                {paginatedNews.map((item, index) => (
+                    <div
+                        key={index}
+                        className={`p-4 rounded-lg border-4 hover:border-blue-500 transition-all 
+                    ${item.sentiment === 'positive' ? 'border-green-500' :
+                            item.sentiment === 'negative' ? 'border-red-500' :
+                                'border-yellow-500'} 
+                    dark:border-dark-border bg-white dark:bg-dark-surface cursor-pointer`}
+                        onClick={() => handleArticleClick(item)}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                    <span
+                        className={`inline-flex items-center text-sm font-medium
+                      ${
+                            item.source === "Gleaner"
+                                ? "text-blue-600 dark:text-blue-400"
+                                : "text-orange-600 dark:text-orange-400"
+                        }`}
                     >
                       <NewspaperIcon className="h-4 w-4 mr-1" />
                       {item.source}
                     </span>
-                    {item.category?.map((cat, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 text-xs bg-neutral-100 dark:bg-dark-surface text-neutral-600 dark:text-dark-text rounded-full"
-                      >
+                          {item.category?.map((cat, idx) => (
+                              <span
+                                  key={idx}
+                                  className="px-2 py-1 text-xs bg-neutral-100 dark:bg-dark-surface text-neutral-600 dark:text-dark-text rounded-full"
+                              >
                         {cat}
                       </span>
-                    ))}
-                  </div>
-                  <div className="flex items-center space-x-2 text-neutral-500 dark:text-dark-text">
-                    <ClockIcon className="h-4 w-4" />
-                    <span className="text-sm">{item.pubDate}</span>
-                  </div>
-                </div>
+                          ))}
+                        </div>
+                        <div className="flex items-center space-x-2 text-neutral-500 dark:text-dark-text">
+                          <ClockIcon className="h-4 w-4" />
+                          <span className="text-sm">{item.pubDate}</span>
+                        </div>
+                      </div>
 
-                <h3 className="text-lg font-semibold mb-2 text-neutral-900 dark:text-dark-text hover:text-blue-600 dark:hover:text-blue-400">
-                  {item.title}
-                </h3>
+                      <h3 className="text-lg font-semibold mb-2 text-neutral-900 dark:text-dark-text hover:text-blue-600 dark:hover:text-blue-400">
+                        {item.title}
+                      </h3>
 
-                {item.description && <p className="text-neutral-600 dark:text-dark-text mb-2">{item.description}</p>}
+                      {item.description && <p className="text-neutral-600 dark:text-dark-text mb-2">{item.description}</p>}
 
-                {item.creator && (
-                  <div className="flex items-center text-sm text-neutral-500 dark:text-dark-text">
-                    <UserIcon className="h-4 w-4 mr-1" />
-                    {item.creator}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page}>
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
+                      {item.creator && (
+                          <div className="flex items-center text-sm text-neutral-500 dark:text-dark-text">
+                            <UserIcon className="h-4 w-4 mr-1" />
+                            {item.creator}
+                          </div>
+                      )}
+                    </div>
                 ))}
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink onClick={() => setCurrentPage(page)} isActive={currentPage === page}>
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                          disabled={currentPage === totalPages}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+          )}
+        </CardContent>
+      </Card>
   )
 }
 
