@@ -57,7 +57,35 @@ const NewsAggregator = () => {
   const [audioError, setAudioError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-
+const formatRSSDate = (dateStr) => {
+  try {
+    // If empty string, return current date
+    if (!dateStr) {
+      return new Date().toLocaleString();
+    }
+    
+    // Create a date object from the RSS date string
+    const date = new Date(dateStr);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      console.error("Invalid date string:", dateStr);
+      return "Date unavailable";
+    }
+    
+    // Format the date with options to ensure proper display
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    console.error("Error parsing date:", error, dateStr);
+    return "Date unavailable";
+  }
+};
 
 
   const fetchArticleContent = async (url: string) => {
@@ -282,10 +310,20 @@ const NewsAggregator = () => {
         const gleanerXML = parser.parseFromString(data.gleaner, "text/xml")
         const observerXML = parser.parseFromString(data.observer, "text/xml")
 
+        console.log("GLEANER RSS DATE SAMPLES:");
+        const gleanerDates = Array.from(gleanerXML.querySelectorAll("item")).slice(0, 3)
+        .map(item => item.querySelector("pubDate")?.textContent);
+        console.log(gleanerDates);
+
+        console.log("OBSERVER RSS DATE SAMPLES:");
+        const observerDates = Array.from(observerXML.querySelectorAll("item")).slice(0, 3)
+          .map(item => item.querySelector("pubDate")?.textContent);
+        console.log(observerDates);
+
         const gleanerItems = Array.from(gleanerXML.querySelectorAll("item")).map((item) => ({
           title: item.querySelector("title")?.textContent || "",
           link: item.querySelector("link")?.textContent || "",
-          pubDate: new Date(item.querySelector("pubDate")?.textContent || "").toLocaleString(),
+          pubDate: formatRSSDate(item.querySelector("pubDate")?.textContent || ""),
           description: item.querySelector("description")?.textContent?.trim() || "",
           creator: item.querySelector("dc\\:creator")?.textContent || "",
           source: "Gleaner" as const,
@@ -296,7 +334,7 @@ const NewsAggregator = () => {
         const observerItems = Array.from(observerXML.querySelectorAll("item")).map((item) => ({
           title: item.querySelector("title")?.textContent || "",
           link: item.querySelector("link")?.textContent || "",
-          pubDate: new Date(item.querySelector("pubDate")?.textContent || "").toLocaleString(),
+          pubDate: formatRSSDate(item.querySelector("pubDate")?.textContent || ""),
           description: item.querySelector("description")?.textContent?.trim() || "",
           creator: item.querySelector("dc\\:creator")?.textContent || "",
           source: "Observer" as const,
@@ -473,10 +511,10 @@ const NewsAggregator = () => {
                 </span>
                 )}
               </div>
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <ClockIcon className="h-4 w-4" />
-                <span>{selectedArticle.pubDate}</span>
-              </div>
+                { <span>{selectedArticle.pubDate}</span> }
+              </div> */}
             </div>
           </CardHeader>
           <CardContent>
@@ -682,10 +720,10 @@ const NewsAggregator = () => {
                       </span>
                           ))}
                         </div>
-                        <div className="flex items-center space-x-2 text-neutral-500 dark:text-dark-text">
+                        {/* <div className="flex items-center space-x-2 text-neutral-500 dark:text-dark-text">
                           <ClockIcon className="h-4 w-4" />
                           <span className="text-sm">{item.pubDate}</span>
-                        </div>
+                        </div> */}
                       </div>
 
                       <h3 className="text-lg font-semibold mb-2 text-neutral-900 dark:text-dark-text hover:text-blue-600 dark:hover:text-blue-400">

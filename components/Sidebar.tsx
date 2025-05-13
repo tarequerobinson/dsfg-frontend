@@ -73,28 +73,28 @@ const Sidebar = () => {
   }
 
   const portfolioItems = [
-    { 
-      href: "/real-estate", 
-      icon: Building, 
-      label: "Real Estate",
-      subItems: [
-        { href: "/real-estate/residential", icon: Home, label: "Residential" },
-        { href: "/real-estate/commercial", icon: Building, label: "Commercial" },
-        { href: "/real-estate/land", icon: LandPlot, label: "Land" }
-      ]
-    },
-    { href: "/bonds", icon: Briefcase, label: "Bonds" },
-    { href: "/stocks", icon: LineChart, label: "Stocks" }
-  ]
+    // { 
+      // href: "/real-estate", 
+      // icon: Building, 
+      // label: "Real Estate",
+      // subItems: [
+        // { href: "/real-estate/residential", icon: Home, label: "Residential" },
+        // { href: "/real-estate/commercial", icon: Building, label: "Commercial" },
+        // { href: "/real-estate/land", icon: LandPlot, label: "Land" }
+      //]
+    // },
+    // { href: "/bonds", icon: Briefcase, label: "Bonds" },
+    // { href: "/stocks", icon: LineChart, label: "Stocks" }
+   ]
 
   const otherMenuItems = [
-    { href: "/update-networth", icon: Scale, label: "Update Net Worth", badge: "Live" },
     { href: "/news", icon: Newspaper, label: "News" },
-    { href: "/alerts", icon: VibrateIcon, label: "Alerts" },
+    // { href: "/alerts", icon: VibrateIcon, label: "Alerts" },
+    // { href: "/update-networth", icon: Scale, label: "Update Net Worth", badge: "Live" },
     { href: "/event-calendar", icon: Calendar, label: "Events" },
     { href: "/user-update", icon: User, label: "Profile" },
-    { href: "/risk-assessment", icon: AlertTriangle, label: "Risk Assessment" },
-    { href: "/submit-financial-info", icon: FileText, label: "Submit"}
+    // { href: "/risk-assessment", icon: AlertTriangle, label: "Risk Assessment" },
+    // { href: "/submit-financial-info", icon: FileText, label: "Submit"}
     // { href: "/financial-summarizer", icon: FileText, label: "Summarizer" }
   ]
 
@@ -128,29 +128,15 @@ const Sidebar = () => {
       <nav className="flex-1 overflow-y-auto pb-4 px-3">
         {/* Portfolio Section */}
         <div className="mt-6">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setIsPortfolioExpanded(!isPortfolioExpanded)}
-            className="w-full flex items-center p-2.5 rounded-lg bg-gradient-to-r from-emerald-400/10 to-blue-500/10 hover:from-emerald-400/20 hover:to-blue-500/20 transition-colors"
-          >
-            <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-2 rounded-lg">
-              <Wallet className="flex-shrink-0 text-white" size={16} />
+          <Link
+              href="/dashboard">
+            <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-2 rounded-lg flex items-center space-x-2">
+              <Wallet className="text-white" size={20} />
+              <span className="text-white">Portfolio</span>
             </div>
-            <motion.span variants={textVariants} className="overflow-hidden font-medium text-neutral-700 dark:text-neutral-200">
-              Portfolio
-            </motion.span>
-            <motion.span variants={textVariants} className="ml-auto">
-              <ChevronDown
-                size={16}
-                className={`transform transition-transform text-neutral-500 ${
-                  isPortfolioExpanded ? "rotate-180" : ""
-                }`}
-              />
-            </motion.span>
-          </motion.button>
+          </Link>
 
-          <AnimatePresence initial={false}>
+          {/* <AnimatePresence initial={false}>
             {isPortfolioExpanded && (
               <motion.div
                 initial="collapsed"
@@ -193,7 +179,7 @@ const Sidebar = () => {
                 ))}
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
         </div>
 
         {/* Other Menu Items */}

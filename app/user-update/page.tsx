@@ -86,7 +86,7 @@ export default function UpdateProfile() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/submit", {
+      const response = await fetch("http://localhost:5000/api/auth/update", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

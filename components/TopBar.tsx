@@ -69,105 +69,105 @@ const financialServices = [
     icon: CardIcon,
     path: "/uploads",
     description: "Make purchases online and in-store with virtual and physical debit cards"
-  },
-  { 
-    id: 2, 
-    name: "Domestic Transfers", 
-    icon: TransferIcon,
-    path: "/services/domestic-transfers",
-    description: "Send money instantly to any local bank account or mobile number"
-  },
-  { 
-    id: 3, 
-    name: "International Transfers", 
-    icon: GlobalIcon,
-    path: "/services/international-transfers",
-    description: "Send money abroad with competitive exchange rates and low fees"
-  },
-  { 
-    id: 4, 
-    name: "Bill Payments", 
-    icon: BillIcon,
-    path: "/services/bill-payments",
-    description: "Pay utility bills, taxes, and other dues directly from your account"
-  },
-  { 
-    id: 5, 
-    name: "Direct Deposits", 
-    icon: DepositIcon,
-    path: "/services/direct-deposits",
-    description: "Receive salary and other regular payments automatically"
-  },
-  { 
-    id: 6, 
-    name: "Standing Orders", 
-    icon: RecurringIcon,
-    path: "/services/standing-orders",
-    description: "Set up automated regular payments to other accounts"
-  },
-  { 
-    id: 7, 
-    name: "Direct Debits", 
-    icon: DebitIcon,
-    path: "/services/direct-debits",
-    description: "Authorize companies to collect payments automatically"
-  },
-  { 
-    id: 8,
-    name: "Mobile Top-ups",
-    icon: TopupIcon,
-    path: "/services/mobile-topup",
-    description: "Purchase airtime and data for any mobile network"
-  },
-  {
-    id: 9,
-    name: "Currency Exchange",
-    icon: ForexIcon,
-    path: "/services/forex",
-    description: "Convert between currencies at competitive rates"
-  },
-  {
-    id: 10,
-    name: "QR Payments",
-    icon: QRIcon,
-    path: "/services/qr-payments",
-    description: "Pay merchants instantly by scanning their QR code"
-  },
-  {
-    id: 11,
-    name: "Cash Deposits",
-    icon: CashIcon,
-    path: "/services/cash-deposits",
-    description: "Add cash to your account through partner locations"
-  },
-  {
-    id: 12,
-    name: "Cash Withdrawals",
-    icon: WithdrawIcon,
-    path: "/services/withdrawals",
-    description: "Withdraw cash from ATMs or partner locations"
-  },
-  {
-    id: 13,
-    name: "Peer Transfers",
-    icon: P2PIcon,
-    path: "/services/peer-transfers",
-    description: "Send money instantly to other users of the platform"
-  },
-  {
-    id: 14,
-    name: "Wire Transfers",
-    icon: WireIcon,
-    path: "/services/wire-transfers",
-    description: "Send secure, same-day transfers for large amounts"
-  },
-  {
-    id: 15,
-    name: "Payment Links",
-    icon: LinkIcon,
-    path: "/services/payment-links",
-    description: "Generate links to receive payments from anyone"
   }
+  // { 
+  //   id: 2, 
+  //   name: "Domestic Transfers", 
+  //   icon: TransferIcon,
+  //   path: "/services/domestic-transfers",
+  //   description: "Send money instantly to any local bank account or mobile number"
+  // },
+  // { 
+  //   id: 3, 
+  //   name: "International Transfers", 
+  //   icon: GlobalIcon,
+  //   path: "/services/international-transfers",
+  //   description: "Send money abroad with competitive exchange rates and low fees"
+  // },
+  // { 
+  //   id: 4, 
+  //   name: "Bill Payments", 
+  //   icon: BillIcon,
+  //   path: "/services/bill-payments",
+  //   description: "Pay utility bills, taxes, and other dues directly from your account"
+  // },
+  // { 
+  //   id: 5, 
+  //   name: "Direct Deposits", 
+  //   icon: DepositIcon,
+  //   path: "/services/direct-deposits",
+  //   description: "Receive salary and other regular payments automatically"
+  // },
+  // { 
+  //   id: 6, 
+  //   name: "Standing Orders", 
+  //   icon: RecurringIcon,
+  //   path: "/services/standing-orders",
+  //   description: "Set up automated regular payments to other accounts"
+  // },
+  // { 
+  //   id: 7, 
+  //   name: "Direct Debits", 
+  //   icon: DebitIcon,
+  //   path: "/services/direct-debits",
+  //   description: "Authorize companies to collect payments automatically"
+  // },
+  // { 
+  //   id: 8,
+  //   name: "Mobile Top-ups",
+  //   icon: TopupIcon,
+  //   path: "/services/mobile-topup",
+  //   description: "Purchase airtime and data for any mobile network"
+  // },
+  // {
+  //   id: 9,
+  //   name: "Currency Exchange",
+  //   icon: ForexIcon,
+  //   path: "/services/forex",
+  //   description: "Convert between currencies at competitive rates"
+  // },
+  // {
+  //   id: 10,
+  //   name: "QR Payments",
+  //   icon: QRIcon,
+  //   path: "/services/qr-payments",
+  //   description: "Pay merchants instantly by scanning their QR code"
+  // },
+  // {
+  //   id: 11,
+  //   name: "Cash Deposits",
+  //   icon: CashIcon,
+  //   path: "/services/cash-deposits",
+  //   description: "Add cash to your account through partner locations"
+  // },
+  // {
+  //   id: 12,
+  //   name: "Cash Withdrawals",
+  //   icon: WithdrawIcon,
+  //   path: "/services/withdrawals",
+  //   description: "Withdraw cash from ATMs or partner locations"
+  // },
+  // {
+  //   id: 13,
+  //   name: "Peer Transfers",
+  //   icon: P2PIcon,
+  //   path: "/services/peer-transfers",
+  //   description: "Send money instantly to other users of the platform"
+  // },
+  // {
+  //   id: 14,
+  //   name: "Wire Transfers",
+  //   icon: WireIcon,
+  //   path: "/services/wire-transfers",
+  //   description: "Send secure, same-day transfers for large amounts"
+  // },
+  // {
+  //   id: 15,
+  //   name: "Payment Links",
+  //   icon: LinkIcon,
+  //   path: "/services/payment-links",
+  //   description: "Generate links to receive payments from anyone"
+  // }
 ];
 
 
@@ -358,13 +358,13 @@ const financialServices = [
                   className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg ring-1 ring-gray-200 dark:ring-[#333333] z-50"
                 >
                   <div className="py-1">
-                    <button
+                    {/* <button
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#262626] transition-colors"
                     >
                       <User className="h-4 w-4 mr-3" />
                       Profile
-                    </button>
-                    <button
+                    </button> */}
+                    {/* <button
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#262626] transition-colors"
                     >
                       <Mail className="h-4 w-4 mr-3" />
@@ -375,7 +375,7 @@ const financialServices = [
                     >
                       <HelpCircle className="h-4 w-4 mr-3" />
                       Help
-                    </button>
+                    </button> */}
                     <div className="border-t border-gray-200 dark:border-[#333333]"></div>
                     <button
                       onClick={handleSignOut}
