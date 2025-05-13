@@ -1,148 +1,134 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { ChevronLeft, ChevronRight, CalendarIcon, List, Bell, BellOff, Clock } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { extractDatesFromText, extractEventDetails } from "@/utils/dateExtractor"
-import { format, isSameMonth, isSameDay } from "date-fns"
+import { useState, useEffect } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ChevronLeft, ChevronRight, Clock, Bell, BellOff } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { format, isSameMonth, isSameDay } from "date-fns";
 
 interface RssEvent {
-  title: string
-  link: string
-  pubDate: string
-  description: string
-  eventDate: Date
-  eventType: string
-  company: string
+  title: string;
+  link: string;
+  pubDate: string;
+  description: string;
+  eventDate: Date | null;
+  eventType: string;
+  company: string;
 }
 
 export default function BusinessCalendar() {
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [isCalendarView, setIsCalendarView] = useState(true)
-  const [alertsEnabled, setAlertsEnabled] = useState(false)
-  const [showAlert, setShowAlert] = useState(false)
-  const [events, setEvents] = useState<RssEvent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [listViewMode, setListViewMode] = useState<"month" | "all">("all")
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [alertsEnabled, setAlertsEnabled] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [events, setEvents] = useState<RssEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [listViewMode, setListViewMode] = useState<"month" | "all">("all");
 
   useEffect(() => {
     async function fetchEvents() {
-      try {
-        const response = await fetch("/api/jse-events")
-        if (!response.ok) throw new Error("Failed to fetch events")
+      // Check local storage for cached events
+      const cachedEvents = localStorage.getItem("jse-events");
+      if (cachedEvents) {
+        const { events, timestamp } = JSON.parse(cachedEvents);
+        if (Date.now() - timestamp < 60 * 60 * 1000) { // 1 hour cache
+          setEvents(
+            events.map((event: RssEvent) => ({
+              ...event,
+              eventDate: event.eventDate ? new Date(event.eventDate) : null,
+            }))
+          );
+          setLoading(false);
+          return;
+        }
+      }
 
-        const data = await response.json()
-        if (!data.jamstockex) {
-          throw new Error("No JSE data received")
+      try {
+        const response = await fetch("/api/jse-events");
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+
+        const data = await response.json();
+        if (!data.events) {
+          throw new Error("No event data received");
         }
 
-        const parser = new DOMParser()
-        const doc = parser.parseFromString(data.jamstockex, "text/xml")
+        const parsedEvents = data.events.map((event: RssEvent) => ({
+          ...event,
+          eventDate: event.eventDate ? new Date(event.eventDate) : null,
+        }));
 
-        const items = Array.from(doc.querySelectorAll("item")).flatMap((item): RssEvent[] => {
-          const title = item.querySelector("title")?.textContent || ""
-          const description = item.querySelector("description")?.textContent || ""
-          const pubDate = item.querySelector("pubDate")?.textContent || ""
-          const link = item.querySelector("link")?.textContent || ""
+        setEvents(parsedEvents);
+        setError(null);
 
-          const dates = extractDatesFromText(description)
-          const { eventType, company } = extractEventDetails(description)
-
-          return dates.map((date) => ({
-            title,
-            link,
-            pubDate,
-            description,
-            eventDate: date,
-            eventType,
-            company,
-          }))
-        })
-
-        setEvents(items)
-        setError(null)
+        // Cache events in local storage
+        localStorage.setItem(
+          "jse-events",
+          JSON.stringify({ events: parsedEvents, timestamp: Date.now() })
+        );
       } catch (error) {
-        console.error("Error fetching RSS feed:", error)
-        setError(error instanceof Error ? error.message : "Failed to fetch events")
+        console.error("Error fetching events:", error);
+        setError(error instanceof Error ? error.message : "Failed to fetch events");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    fetchEvents()
-  }, [])
+    fetchEvents();
+  }, []);
 
   const toggleAlerts = () => {
-    setAlertsEnabled(!alertsEnabled)
-    setShowAlert(true)
-    setTimeout(() => setShowAlert(false), 3000)
-  }
+    setAlertsEnabled(!alertsEnabled);
+    setShowAlert(true);
+    setTimeout(() => setShowAlert(false), 3000);
+  };
 
-  const getEventStatus = (date: string) => {
-    const today = new Date()
-    const eventDate = new Date(date)
-    today.setHours(0, 0, 0, 0)
-    eventDate.setHours(0, 0, 0, 0)
+  const getEventStatus = (date: Date | null) => {
+    if (!date) return "upcoming";
+    const today = new Date();
+    const eventDate = new Date(date);
+    today.setHours(0, 0, 0, 0);
+    eventDate.setHours(0, 0, 0, 0);
 
-    if (eventDate.getTime() === today.getTime()) return "today"
-    if (eventDate < today) return "past"
-    return "upcoming"
-  }
+    if (eventDate.getTime() === today.getTime()) return "today";
+    if (eventDate < today) return "past";
+    return "upcoming";
+  };
 
   const getStatusStyles = (status: string) => {
     const styles = {
       past: "opacity-50",
       today: "border-2 border-blue-500",
       upcoming: "",
-    }
-    return styles[status as keyof typeof styles] || ""
-  }
+    };
+    return styles[status as keyof typeof styles] || "";
+  };
 
   const getStatusLabel = (status: string) => {
     const labels = {
       past: "Past Events",
       today: "Today's Events",
       upcoming: "Upcoming Events",
-    }
-    return labels[status as keyof typeof labels]
-  }
-
-  const getMonthDays = (date: Date) => {
-    const year = date.getFullYear()
-    const month = date.getMonth()
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
-
-    const days = []
-    for (let d = 1; d <= lastDay.getDate(); d++) {
-      days.push(new Date(year, month, d))
-    }
-    return days
-  }
-
-  const getEventsForDate = (date: Date) => {
-    return events.filter((event) => isSameDay(event.eventDate, date))
-  }
-
-  const getFilteredEvents = () => {
-    if (listViewMode === "month") {
-      return events
-        .filter((event) => isSameMonth(event.eventDate, currentMonth))
-        .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
-    } else {
-      return events
-        .filter((event) => event.eventDate >= new Date())
-        .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
-    }
-  }
+    };
+    return labels[status as keyof typeof labels];
+  };
 
   const navigateMonth = (direction: number) => {
-    const newDate = new Date(currentMonth)
-    newDate.setMonth(currentMonth.getMonth() + direction)
-    setCurrentMonth(newDate)
-  }
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(currentMonth.getMonth() + direction);
+    setCurrentMonth(newDate);
+  };
+
+  const getFilteredEvents = () => {
+    const filtered = listViewMode === "month"
+      ? events.filter((event) => event.eventDate && isSameMonth(event.eventDate, currentMonth))
+      : events.filter((event) => !event.eventDate || event.eventDate >= new Date());
+
+    return filtered.sort((a, b) => {
+      const dateA = a.eventDate ? a.eventDate.getTime() : Infinity;
+      const dateB = b.eventDate ? b.eventDate.getTime() : Infinity;
+      return dateA - dateB;
+    });
+  };
 
   const getEventTypeColor = (type: string) => {
     const colors = {
@@ -156,16 +142,23 @@ export default function BusinessCalendar() {
       Merger: "bg-indigo-100 text-indigo-900 dark:bg-indigo-400 dark:text-indigo-950",
       Acquisition: "bg-cyan-100 text-cyan-900 dark:bg-cyan-400 dark:text-cyan-950",
       "Corporate Event": "bg-neutral-100 text-neutral-900 dark:bg-neutral-400 dark:text-neutral-950",
-    }
-    return colors[type as keyof typeof colors] || colors["Corporate Event"]
-  }
+    };
+    return colors[type as keyof typeof colors] || colors["Corporate Event"];
+  };
+
+  const getEventColorDot = (type: string) => {
+    // Extract the background color class for the legend dots
+    const colorClass = getEventTypeColor(type);
+    const bgClassMatch = colorClass.match(/bg-([^\s]+)/);
+    return bgClassMatch ? `bg-${bgClassMatch[1]}` : "bg-neutral-400";
+  };
 
   const eventGroups = {
     "Corporate Events": ["AGM", "Board Meeting", "Earnings"],
     "Stock Events": ["Stock Split", "Rights Issue"],
     "Public Offerings": ["IPO"],
     "Financial Events": ["Dividend", "Merger", "Acquisition"],
-  }
+  };
 
   const Legend = () => (
     <div className="mt-6 border-t border-neutral-200 pt-4 dark:border-neutral-800">
@@ -177,7 +170,7 @@ export default function BusinessCalendar() {
             <div className="space-y-1">
               {types.map((type) => (
                 <div key={type} className="flex items-center space-x-2">
-                  <span className={`w-3 h-3 rounded-full ${getEventTypeColor(type).replace("text-", "bg-")}`}></span>
+                  <span className={`w-3 h-3 rounded-full ${getEventColorDot(type)}`}></span>
                   <span className="text-sm text-neutral-700 dark:text-neutral-200">{type}</span>
                 </div>
               ))}
@@ -186,57 +179,17 @@ export default function BusinessCalendar() {
         ))}
       </div>
     </div>
-  )
-
-  const CalendarView = () => (
-    <div className="grid grid-cols-7 gap-2">
-      {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-        <div key={day} className="text-center font-semibold p-2 text-neutral-900 dark:text-neutral-50">
-          {day}
-        </div>
-      ))}
-
-      {getMonthDays(currentMonth).map((date, index) => {
-        const events = getEventsForDate(date)
-        const isToday = isSameDay(date, new Date())
-
-        return (
-          <div
-            key={date.toString()}
-            className={`min-h-24 p-2 border rounded-lg border-neutral-200 
-              ${isSameMonth(date, currentMonth) ? "bg-white dark:bg-neutral-900" : "bg-neutral-50 dark:bg-neutral-950"} 
-              ${isToday ? "ring-2 ring-blue-500" : ""}
-              dark:border-neutral-800`}
-            style={{ gridColumnStart: index === 0 ? date.getDay() + 1 : "auto" }}
-          >
-            <div className="font-medium text-sm mb-1 text-neutral-900 dark:text-neutral-50">{date.getDate()}</div>
-            <div className="space-y-1 max-h-20 overflow-y-auto">
-              {events.map((event, i) => (
-                <div
-                  key={i}
-                  className={`text-xs p-1 rounded ${getEventTypeColor(event.eventType)}`}
-                  title={`${event.company}: ${event.title}`}
-                >
-                  <div className="font-semibold truncate">{event.eventType}</div>
-                  <div className="truncate">{event.company}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
+  );
 
   const ListView = () => {
-    const events = getFilteredEvents()
-    const today = new Date()
+    const events = getFilteredEvents();
+    const today = new Date();
 
     const groupedEvents = {
-      upcoming: events.filter((event) => event.eventDate > today),
-      today: events.filter((event) => isSameDay(event.eventDate, today)),
-      past: events.filter((event) => event.eventDate < today && listViewMode === "month"),
-    }
+      upcoming: events.filter((event) => !event.eventDate || event.eventDate > today),
+      today: events.filter((event) => event.eventDate && isSameDay(event.eventDate, today)),
+      past: events.filter((event) => event.eventDate && event.eventDate < today && listViewMode === "month"),
+    };
 
     return (
       <div className="space-y-6">
@@ -271,7 +224,7 @@ export default function BusinessCalendar() {
                             {event.eventType}
                           </span>
                           <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                            {format(event.eventDate, "MMMM d, yyyy")}
+                            {event.eventDate ? format(event.eventDate, "MMMM d, yyyy") : "TBD"}
                           </span>
                         </div>
                         <h3 className="text-lg font-semibold mt-2 text-neutral-900 dark:text-neutral-50">
@@ -294,8 +247,8 @@ export default function BusinessCalendar() {
             ),
         )}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <Card className="max-w-6xl mx-auto">
@@ -303,11 +256,9 @@ export default function BusinessCalendar() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-2xl font-bold">
             JSE Business Calendar
-            {!isCalendarView && (
-              <span className="text-sm font-normal ml-2">
-                ({listViewMode === "month" ? "Current Month" : "All Upcoming"})
-              </span>
-            )}
+            <span className="text-sm font-normal ml-2">
+              ({listViewMode === "month" ? "Current Month" : "All Upcoming"})
+            </span>
           </CardTitle>
           <div className="flex items-center space-x-4">
             <button
@@ -336,12 +287,6 @@ export default function BusinessCalendar() {
             >
               <ChevronRight className="h-5 w-5" />
             </button>
-            <button
-              onClick={() => setIsCalendarView(!isCalendarView)}
-              className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full"
-            >
-              {isCalendarView ? <List className="h-5 w-5" /> : <CalendarIcon className="h-5 w-5" />}
-            </button>
           </div>
         </div>
         {showAlert && (
@@ -353,24 +298,28 @@ export default function BusinessCalendar() {
             </AlertDescription>
           </Alert>
         )}
+        {error && (
+          <Alert className="mt-4" variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </CardHeader>
       <CardContent>
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
           </div>
-        ) : error ? (
-          <div className="text-center py-12 text-red-500">
-            <p>{error}</p>
+        ) : events.length === 0 && !error ? (
+          <div className="text-center py-12 text-neutral-500">
+            <p>No events available. Please try again later.</p>
           </div>
         ) : (
           <>
-            {isCalendarView ? <CalendarView /> : <ListView />}
+            <ListView />
             <Legend />
           </>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
-

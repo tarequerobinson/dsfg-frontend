@@ -61,7 +61,7 @@ export default function Dashboard() {
         setError(null)
       } catch (err) {
         console.error("Error fetching dashboard data:", err)
-        setError("Unable to load dashboard data. Please try again later.")
+        setError("Your Portfolio is Empty. Please upload csv with portfolio dat to get started.")
       } finally {
         setLoading(false)
       }
