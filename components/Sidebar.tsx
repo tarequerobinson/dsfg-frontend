@@ -93,7 +93,7 @@ const Sidebar = () => {
     // { href: "/update-networth", icon: Scale, label: "Update Net Worth", badge: "Live" },
     { href: "/event-calendar", icon: Calendar, label: "Events" },
     { href: "/user-update", icon: User, label: "Profile" },
-    // { href: "/risk-assessment", icon: AlertTriangle, label: "Risk Assessment" },
+    { href: "/risk-assessment", icon: AlertTriangle, label: "Risk Assessment" },
     // { href: "/submit-financial-info", icon: FileText, label: "Submit"}
     // { href: "/financial-summarizer", icon: FileText, label: "Summarizer" }
   ]
