@@ -55,8 +55,6 @@ const StockTicker = ({ darkMode }) => {
             symbol: stock.symbol,
             name: stock.name,
             price: stock.close_price,
-            change: randomChange, // Random for demo purposes
-            volume: `${Math.floor(Math.random() * 1000) + 100}K`, // Random volume for demo
             logo: STOCK_LOGOS[stock.symbol] || DEFAULT_LOGO
           };
         });
@@ -81,8 +79,6 @@ const StockTicker = ({ darkMode }) => {
       setStocks((prevStocks) =>
         prevStocks.map((stock) => ({
           ...stock,
-          price: stock.price + (Math.random() - 0.5) * 2,
-          change: (Math.random() - 0.5) * 4, // Random change for visual effect
         }))
       );
     }, 5000);

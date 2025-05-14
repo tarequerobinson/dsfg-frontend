@@ -12,7 +12,7 @@ type Message = {
   text: string
   sender: "user" | "bot"
   timestamp: Date
-  type?: "pdf-upload" | "regular" | "pdf-response" | "goal" | "alert"
+  type?: "pdf-upload" | "regular" | "pdf-response" | "goal" | "alert" | "empty-portfolio"
   goalData?: {
     title: string
     target: number
@@ -24,6 +24,10 @@ type Message = {
     target: string
     condition: string
     notificationMethod: string[]
+  }
+  portfolioData?: {
+    isEmpty: boolean
+    recommendation?: string
   }
 }
 
@@ -42,31 +46,31 @@ type PdfContext = {
 // Animation variants remain the same...
 const chatContainerVariants = {
   hidden: { scale: 0.9, opacity: 0, y: 20 },
-  visible: { 
-    scale: 1, 
-    opacity: 1, 
+  visible: {
+    scale: 1,
+    opacity: 1,
     y: 0,
     transition: { type: "spring", stiffness: 300, damping: 25 }
   },
-  exit: { 
-    scale: 0.9, 
-    opacity: 0, 
+  exit: {
+    scale: 0.9,
+    opacity: 0,
     y: 20,
-    transition: { duration: 0.2 } 
+    transition: { duration: 0.2 }
   }
 }
 
 const fullscreenVariants = {
   hidden: { opacity: 0, scale: 0.9 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     scale: 1,
     transition: { type: "spring", stiffness: 300, damping: 25 }
   },
-  exit: { 
-    opacity: 0, 
+  exit: {
+    opacity: 0,
     scale: 0.9,
-    transition: { duration: 0.2 } 
+    transition: { duration: 0.2 }
   }
 }
 
@@ -96,6 +100,7 @@ const Chatbot = () => {
   const [activePdfContext, setActivePdfContext] = useState<PdfContext | null>(null)
   const [editingGoal, setEditingGoal] = useState<Message['goalData'] | null>(null)
   const [editingAlert, setEditingAlert] = useState<Message['alertData'] | null>(null)
+  const [hasPortfolio, setHasPortfolio] = useState<boolean | null>(null)
 
   // Refined quick prompts for more effective interaction with Gemini
   const quickPrompts: QuickPrompt[] = [
@@ -126,13 +131,81 @@ const Chatbot = () => {
     },
   ]
 
+  // Custom quick prompts for users with empty portfolios
+  const emptyPortfolioPrompts: QuickPrompt[] = [
+    {
+      text: "What's the best way to start investing with a small amount in Jamaica?",
+      category: "investment",
+      icon: <Wallet size={16} />,
+    },
+    {
+      text: "Can you recommend low-risk investments for beginners in Jamaica?",
+      category: "risk",
+      icon: <AlertTriangle size={16} />,
+    },
+    {
+      text: "How do I open a brokerage account in Jamaica?",
+      category: "planning",
+      icon: <BookOpen size={16} />,
+    },
+    {
+      text: "What are the minimum amounts needed to start investing in the Jamaican stock market?",
+      category: "investment",
+      icon: <DollarSign size={16} />,
+    },
+    {
+      text: "What should I know before making my first investment in Jamaica?",
+      category: "planning",
+      icon: <Info size={16} />,
+    },
+  ]
+
   const toggleChat = () => {
     setIsOpen(!isOpen)
+
+    // Check portfolio status when chat opens if we haven't checked yet
+    if (!isOpen && hasPortfolio === null) {
+      checkPortfolioStatus()
+    }
+  }
+
+  // Function to check if user has a portfolio
+  const checkPortfolioStatus = async () => {
+    try {
+      // Mock API call - in real implementation, fetch portfolio data
+      // const response = await fetch('/api/portfolio/status')
+      // const data = await response.json()
+      // setHasPortfolio(data.hasPortfolio)
+
+      // For demo purposes, simulate empty portfolio
+      setHasPortfolio(false)
+
+      // If portfolio is empty, display guidance message
+      if (!hasPortfolio && messages.length === 0) {
+        setTimeout(() => {
+          const welcomeMessage: Message = {
+            text: "Welcome to your financial assistant! I notice you don't have any investments in your portfolio yet. Would you like some guidance on how to start investing in Jamaica?",
+            sender: "bot",
+            timestamp: new Date(),
+            type: "empty-portfolio",
+            portfolioData: {
+              isEmpty: true,
+              recommendation: "I can help you understand the basics of investing in Jamaica, from opening a brokerage account to selecting your first investments."
+            }
+          }
+          setMessages([welcomeMessage])
+        }, 1000)
+      }
+    } catch (error) {
+      console.error("Error checking portfolio status:", error)
+      // Default to standard experience if we can't determine portfolio status
+      setHasPortfolio(true)
+    }
   }
 
   const handlePdfUpload = async (file: File) => {
     setIsTyping(true)
-    
+
     // Add user message for PDF upload
     const userMessage: Message = {
       text: `Uploaded document: ${file.name}`,
@@ -220,7 +293,10 @@ const Chatbot = () => {
           pdfContext: activePdfContext ? {
             topics: activePdfContext.topics,
             summary: activePdfContext.summary
-          } : null
+          } : null,
+          portfolioContext: {
+            isEmpty: hasPortfolio === false
+          }
         }),
       })
 
@@ -229,7 +305,7 @@ const Chatbot = () => {
       }
 
       const data = await response.json()
-      
+
       // Handle structured responses
       if (data.type === 'goal') {
         const botMessage: Message = {
@@ -245,7 +321,7 @@ const Chatbot = () => {
           }
         }
         setMessages(prev => [...prev, botMessage])
-      } 
+      }
       else if (data.type === 'alert') {
         const botMessage: Message = {
           text: data.text,
@@ -305,7 +381,10 @@ const Chatbot = () => {
           pdfContext: activePdfContext ? {
             topics: activePdfContext.topics,
             summary: activePdfContext.summary
-          } : null
+          } : null,
+          portfolioContext: {
+            isEmpty: hasPortfolio === false
+          }
         }),
       })
 
@@ -314,7 +393,7 @@ const Chatbot = () => {
       }
 
       const data = await response.json()
-      
+
       // Handle structured responses
       if (data.type === 'goal') {
         const botMessage: Message = {
@@ -330,7 +409,7 @@ const Chatbot = () => {
           }
         }
         setMessages(prev => [...prev, botMessage])
-      } 
+      }
       else if (data.type === 'alert') {
         const botMessage: Message = {
           text: data.text,
@@ -367,6 +446,16 @@ const Chatbot = () => {
     } finally {
       setIsTyping(false)
     }
+  }
+
+  const handleStartPortfolio = () => {
+    const botMessage: Message = {
+      text: "Great! Let's get you started on your investment journey. To begin investing in Jamaica, I'd recommend these steps:\n\n1. **Start with your goals**: What are you saving for and what's your time horizon?\n2. **Setup a brokerage account**: You'll need this to purchase stocks and bonds on the JSE.\n3. **Start with low-risk options**: Consider government bonds or a broad market ETF.\n\nWould you like me to explain any of these steps in more detail?",
+      sender: "bot",
+      timestamp: new Date(),
+      type: "regular"
+    }
+    setMessages(prev => [...prev, botMessage])
   }
 
   const handleConfirmGoal = async (goalData: Message['goalData']) => {
@@ -458,237 +547,269 @@ const Chatbot = () => {
 
     if (message.type === "pdf-response" && activePdfContext) {
       return (
-        <div className={`mt-2 p-2 rounded-lg ${
-          darkMode ? 'bg-zinc-800/30' : 'bg-blue-50'
-        }`}>
-          <div className="flex items-center gap-2 text-xs text-violet-400 mb-2">
-            <File size={14} />
-            <span className="truncate">Context: {activePdfContext.fileName}</span>
+          <div className={`mt-2 p-2 rounded-lg ${
+              darkMode ? 'bg-zinc-800/30' : 'bg-blue-50'
+          }`}>
+            <div className="flex items-center gap-2 text-xs text-violet-400 mb-2">
+              <File size={14} />
+              <span className="truncate">Context: {activePdfContext.fileName}</span>
+            </div>
+            <ReactMarkdown className="prose-sm">
+              {message.text}
+            </ReactMarkdown>
           </div>
-          <ReactMarkdown className="prose-sm">
-            {message.text}
-          </ReactMarkdown>
-        </div>
+      )
+    }
+
+    if (message.type === "empty-portfolio" && message.portfolioData?.isEmpty) {
+      return (
+          <div className={`mt-2 p-3 rounded-lg ${
+              darkMode ? 'bg-blue-900/30 border border-blue-800/50' : 'bg-blue-50 border border-blue-100'
+          }`}>
+            <div className="flex items-center gap-2 text-sm text-blue-500 mb-2">
+              <Wallet size={16} />
+              <span className="font-semibold">New Investor</span>
+            </div>
+
+            <div className="mb-3">
+              <p className="text-sm opacity-80">{message.text}</p>
+            </div>
+
+            {message.portfolioData.recommendation && (
+                <div className="mb-3 text-sm">
+                  <p className="opacity-80">{message.portfolioData.recommendation}</p>
+                </div>
+            )}
+
+            <div className="flex gap-2 mt-2">
+              <button
+                  onClick={handleStartPortfolio}
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+              >
+                Get Started
+              </button>
+            </div>
+          </div>
       )
     }
 
     if (message.type === "goal" && message.goalData) {
       return (
-        <div className={`mt-2 p-3 rounded-lg ${
-          darkMode ? 'bg-emerald-900/30 border border-emerald-800/50' : 'bg-emerald-50 border border-emerald-100'
-        }`}>
-          <div className="flex items-center gap-2 text-sm text-emerald-500 mb-2">
-            <Timer size={16} />
-            <span className="font-semibold">Financial Goal Detected</span>
-          </div>
-          
-          <div className="mb-3">
-            <h4 className="font-medium mb-1">{message.goalData.title}</h4>
-            <p className="text-sm opacity-80">{message.text}</p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-            <div>
-              <span className="opacity-70">Target:</span> 
-              <span className="ml-1 font-medium">${message.goalData.target.toLocaleString()} JMD</span>
+          <div className={`mt-2 p-3 rounded-lg ${
+              darkMode ? 'bg-emerald-900/30 border border-emerald-800/50' : 'bg-emerald-50 border border-emerald-100'
+          }`}>
+            <div className="flex items-center gap-2 text-sm text-emerald-500 mb-2">
+              <Timer size={16} />
+              <span className="font-semibold">Financial Goal Detected</span>
             </div>
-            <div>
-              <span className="opacity-70">Timeframe:</span> 
-              <span className="ml-1 font-medium">{message.goalData.timeframe}</span>
+
+            <div className="mb-3">
+              <h4 className="font-medium mb-1">{message.goalData.title}</h4>
+              <p className="text-sm opacity-80">{message.text}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+              <div>
+                <span className="opacity-70">Target:</span>
+                <span className="ml-1 font-medium">${message.goalData.target.toLocaleString()} JMD</span>
+              </div>
+              <div>
+                <span className="opacity-70">Timeframe:</span>
+                <span className="ml-1 font-medium">{message.goalData.timeframe}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-2">
+              <button
+                  onClick={() => handleConfirmGoal(message.goalData!)}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors"
+              >
+                Confirm Goal
+              </button>
+              <button
+                  onClick={() => handleEditGoal(message.goalData!)}
+                  className="px-3 py-1.5 bg-transparent border border-emerald-600 text-emerald-600 hover:bg-emerald-50 rounded-lg text-sm transition-colors"
+              >
+                Edit
+              </button>
             </div>
           </div>
-          
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={() => handleConfirmGoal(message.goalData!)}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors"
-            >
-              Confirm Goal
-            </button>
-            <button
-              onClick={() => handleEditGoal(message.goalData!)}
-              className="px-3 py-1.5 bg-transparent border border-emerald-600 text-emerald-600 hover:bg-emerald-50 rounded-lg text-sm transition-colors"
-            >
-              Edit
-            </button>
-          </div>
-        </div>
       )
     }
 
     if (message.type === "alert" && message.alertData) {
       return (
-        <div className={`mt-2 p-3 rounded-lg ${
-          darkMode ? 'bg-amber-900/30 border border-amber-800/50' : 'bg-amber-50 border border-amber-100'
-        }`}>
-          <div className="flex items-center gap-2 text-sm text-amber-600 mb-2">
-            <AlertTriangle size={16} />
-            <span className="font-semibold">Market Alert Suggestion</span>
-          </div>
-          
-          <div className="mb-3">
-            <h4 className="font-medium mb-1">{message.alertData.type.charAt(0).toUpperCase() + message.alertData.type.slice(1)} Alert</h4>
-            <p className="text-sm opacity-80">{message.text}</p>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-2 mb-3 text-sm">
-            <div>
-              <span className="opacity-70">When:</span> 
-              <span className="ml-1 font-medium">{message.alertData.target} {message.alertData.condition}</span>
+          <div className={`mt-2 p-3 rounded-lg ${
+              darkMode ? 'bg-amber-900/30 border border-amber-800/50' : 'bg-amber-50 border border-amber-100'
+          }`}>
+            <div className="flex items-center gap-2 text-sm text-amber-600 mb-2">
+              <AlertTriangle size={16} />
+              <span className="font-semibold">Market Alert Suggestion</span>
             </div>
-            <div>
-              <span className="opacity-70">Notify via:</span> 
-              <span className="ml-1 font-medium">{message.alertData.notificationMethod.join(", ")}</span>
+
+            <div className="mb-3">
+              <h4 className="font-medium mb-1">{message.alertData.type.charAt(0).toUpperCase() + message.alertData.type.slice(1)} Alert</h4>
+              <p className="text-sm opacity-80">{message.text}</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 mb-3 text-sm">
+              <div>
+                <span className="opacity-70">When:</span>
+                <span className="ml-1 font-medium">{message.alertData.target} {message.alertData.condition}</span>
+              </div>
+              <div>
+                <span className="opacity-70">Notify via:</span>
+                <span className="ml-1 font-medium">{message.alertData.notificationMethod.join(", ")}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-2">
+              <button
+                  onClick={() => handleConfirmAlert(message.alertData!)}
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm transition-colors"
+              >
+                Set Alert
+              </button>
+              <button
+                  onClick={() => handleEditAlert(message.alertData!)}
+                  className="px-3 py-1.5 bg-transparent border border-amber-600 text-amber-600 hover:bg-amber-50 rounded-lg text-sm transition-colors"
+              >
+                Edit
+              </button>
             </div>
           </div>
-          
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={() => handleConfirmAlert(message.alertData!)}
-              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm transition-colors"
-            >
-              Set Alert
-            </button>
-            <button
-              onClick={() => handleEditAlert(message.alertData!)}
-              className="px-3 py-1.5 bg-transparent border border-amber-600 text-amber-600 hover:bg-amber-50 rounded-lg text-sm transition-colors"
-            >
-              Edit
-            </button>
-          </div>
-        </div>
       )
     }
 
     return (
-      <ReactMarkdown 
-        components={{
-          p: ({node, ...props}) => <p className="my-1" {...props} />,
-          ul: ({node, ...props}) => <ul className="my-1 ml-4 list-disc" {...props} />,
-          ol: ({node, ...props}) => <ol className="my-1 ml-4 list-decimal" {...props} />,
-          li: ({node, ...props}) => <li className="my-0.5" {...props} />,
-          h1: ({node, ...props}) => <h1 className="text-lg font-bold my-2" {...props} />,
-          h2: ({node, ...props}) => <h2 className="text-base font-bold my-2" {...props} />,
-          h3: ({node, ...props}) => <h3 className="text-sm font-bold my-1" {...props} />,
-          code: ({node, ...props}) => <code className="bg-black/10 dark:bg-white/10 rounded px-1" {...props} />,
-          pre: ({node, ...props}) => <pre className="bg-black/10 dark:bg-white/10 p-2 rounded my-2 overflow-x-auto" {...props} />
-        }}
-      >
-        {message.text}
-      </ReactMarkdown>
+        <ReactMarkdown
+            components={{
+              p: ({node, ...props}) => <p className="my-1" {...props} />,
+              ul: ({node, ...props}) => <ul className="my-1 ml-4 list-disc" {...props} />,
+              ol: ({node, ...props}) => <ol className="my-1 ml-4 list-decimal" {...props} />,
+              li: ({node, ...props}) => <li className="my-0.5" {...props} />,
+              h1: ({node, ...props}) => <h1 className="text-lg font-bold my-2" {...props} />,
+              h2: ({node, ...props}) => <h2 className="text-base font-bold my-2" {...props} />,
+              h3: ({node, ...props}) => <h3 className="text-sm font-bold my-1" {...props} />,
+              code: ({node, ...props}) => <code className="bg-black/10 dark:bg-white/10 rounded px-1" {...props} />,
+              pre: ({node, ...props}) => <pre className="bg-black/10 dark:bg-white/10 p-2 rounded my-2 overflow-x-auto" {...props} />
+            }}
+        >
+          {message.text}
+        </ReactMarkdown>
     )
   }
 
   return (
-    <>
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            key="chat-toggle"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={toggleChat}
-            className="fixed bottom-4 right-4 bg-gradient-to-r from-emerald-400 to-blue-500 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all z-50 backdrop-blur-sm"
-          >
-            <MessageCircle size={24} />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      <>
+        <AnimatePresence>
+          {!isOpen && (
+              <motion.button
+                  key="chat-toggle"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={toggleChat}
+                  className="fixed bottom-4 right-4 bg-gradient-to-r from-emerald-400 to-blue-500 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all z-50 backdrop-blur-sm"
+              >
+                <MessageCircle size={24} />
+              </motion.button>
+          )}
+        </AnimatePresence>
 
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {isFullscreen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
-                onClick={() => setIsFullscreen(false)}
-              />
-            )}
-            
-            <motion.div
-              key="chat-window"
-              variants={isFullscreen ? fullscreenVariants : chatContainerVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className={`
+        <AnimatePresence>
+          {isOpen && (
+              <>
+                {isFullscreen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+                        onClick={() => setIsFullscreen(false)}
+                    />
+                )}
+
+                <motion.div
+                    key="chat-window"
+                    variants={isFullscreen ? fullscreenVariants : chatContainerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className={`
                 fixed z-50
-                ${isFullscreen 
-                  ? 'inset-4 md:inset-8 lg:inset-12 max-w-6xl mx-auto'
-                  : 'bottom-4 right-4 w-96 h-[32rem]'
-                }
+                ${isFullscreen
+                        ? 'inset-4 md:inset-8 lg:inset-12 max-w-6xl mx-auto'
+                        : 'bottom-4 right-4 w-96 h-[32rem]'
+                    }
                 flex flex-col
                 rounded-2xl shadow-2xl
-                ${darkMode 
-                  ? "bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50" 
-                  : "bg-white/90 backdrop-blur-md border border-gray-200/50"
-                }
+                ${darkMode
+                        ? "bg-zinc-900/90 backdrop-blur-md border border-zinc-800/50"
+                        : "bg-white/90 backdrop-blur-md border border-gray-200/50"
+                    }
               `}
-            >
-              <div className="flex flex-col h-full">
-                {/* Header - Fixed height */}
-                <div className="flex-none">
-                  <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-4 flex justify-between items-center rounded-t-2xl">
-                    <div className="flex items-center gap-2">
-                      <MessageCircle size={20} className="text-white" />
-                      <h3 className="font-bold text-white">Financial Assistant</h3>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <motion.button 
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={toggleFullscreen}
-                        className="text-white/80 hover:text-white p-1 rounded-lg transition-colors"
-                      >
-                        {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                      </motion.button>
-                      <motion.button 
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={toggleChat}
-                        className="text-white/80 hover:text-white p-1 rounded-lg transition-colors"
-                      >
-                        <X size={20} />
-                      </motion.button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Disclaimer - Conditional render */}
-                <AnimatePresence>
-                  {showDisclaimer && (
-                    <motion.div
-                      key="disclaimer"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="flex-none px-2 pt-2"
-                    >
-                      <Alert className={`${
-                        darkMode 
-                          ? "bg-zinc-800/50 border-zinc-700/50" 
-                          : "bg-violet-50/50 border-violet-100/50"
-                      } backdrop-blur-sm`}>
-                        <Info className="h-4 w-4 text-violet-400" />
-                        <AlertDescription className="text-xs">
-                          This assistant provides general financial information only.
-                          <button
-                            onClick={() => setShowDisclaimer(false)}
-                            className="ml-2 text-violet-400 hover:text-violet-500"
+                >
+                  <div className="flex flex-col h-full">
+                    {/* Header - Fixed height */}
+                    <div className="flex-none">
+                      <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-4 flex justify-between items-center rounded-t-2xl">
+                        <div className="flex items-center gap-2">
+                          <MessageCircle size={20} className="text-white" />
+                          <h3 className="font-bold text-white">Financial Assistant</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={toggleFullscreen}
+                              className="text-white/80 hover:text-white p-1 rounded-lg transition-colors"
                           >
-                            Dismiss
-                          </button>
-                        </AlertDescription>
-                      </Alert>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                          </motion.button>
+                          <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={toggleChat}
+                              className="text-white/80 hover:text-white p-1 rounded-lg transition-colors"
+                          >
+                            <X size={20} />
+                          </motion.button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Disclaimer - Conditional render */}
+                    <AnimatePresence>
+                      {showDisclaimer && (
+                          <motion.div
+                              key="disclaimer"
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="flex-none px-2 pt-2"
+                          >
+                            <Alert className={`${
+                                darkMode
+                                    ? "bg-zinc-800/50 border-zinc-700/50"
+                                    : "bg-violet-50/50 border-violet-100/50"
+                            } backdrop-blur-sm`}>
+                              <Info className="h-4 w-4 text-violet-400" />
+                              <AlertDescription className="text-xs">
+                                This assistant provides general financial information only.
+                                <button
+                                    onClick={() => setShowDisclaimer(false)}
+                                    className="ml-2 text-violet-400 hover:text-violet-500"
+                                >
+                                  Dismiss
+                                </button>
+                              </AlertDescription>
+                            </Alert>
+                          </motion.div>
+                      )}
+                    </AnimatePresence>
 
                 {/* Messages - Scrollable */}
                 <div className="flex-1 overflow-y-auto min-h-0 px-4">

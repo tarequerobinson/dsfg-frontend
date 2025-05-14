@@ -5,24 +5,26 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 // Helper function to parse response for structured data
 function parseResponse(text) {
+  console.log("Parsing response text:", text)
+
   // Check for goal pattern
   if (text.includes("GOAL:") || (text.includes("financial goal") && text.includes("target"))) {
     try {
       // Extract goal information
-      const title = text.match(/title[:=]\s*(.*?)(?:\n|$)/i)?.[1]?.trim() || 
-                    text.match(/(?:saving|investment|financial) goal[:\s]+(.*?)(?:\n|$)/i)?.[1]?.trim() ||
-                    "Financial Goal"
-      
+      const title = text.match(/title[:=]\s*(.*?)(?:\n|$)/i)?.[1]?.trim() ||
+          text.match(/(?:saving|investment|financial) goal[:\s]+(.*?)(?:\n|$)/i)?.[1]?.trim() ||
+          "Financial Goal"
+
       const targetMatch = text.match(/(?:target|amount)[:\s]+\$?([\d,]+)/i)
       const target = targetMatch ? parseInt(targetMatch[1].replace(/,/g, '')) : 100000
-      
+
       const timeframeMatch = text.match(/(?:timeframe|by|within|in)[:\s]+((?:\d+\s+(?:years?|months?)|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}))/i)
       const timeframe = timeframeMatch ? timeframeMatch[1].trim() : "1 year"
-      
+
       const descriptionMatch = text.match(/description[:=]\s*(.*?)(?:\n\n|\n(?=[A-Z])|\n$|$)/is)
       const description = descriptionMatch ? descriptionMatch[1].trim() : undefined
-      
-      return {
+
+      const goalData = {
         type: "goal",
         text: text,
         goal: {
@@ -32,31 +34,34 @@ function parseResponse(text) {
           description
         }
       }
+
+      console.log("Parsed goal data:", JSON.stringify(goalData, null, 2))
+      return goalData
     } catch (error) {
       console.error("Error parsing goal data:", error)
     }
   }
-  
+
   // Check for alert pattern
   if (text.includes("ALERT:") || text.includes("market alert") || text.includes("price alert")) {
     try {
       // Extract alert information
       const typeMatch = text.match(/(?:alert type|type)[:=]\s*(price|market|news)/i)
       const type = typeMatch ? typeMatch[1].toLowerCase() : "price"
-      
+
       const targetMatch = text.match(/(?:target|for)[:=]\s*(.*?)(?:\n|when|\s+if)/i)
       const target = targetMatch ? targetMatch[1].trim() : "JSE Index"
-      
+
       const conditionMatch = text.match(/(?:condition|when|if)[:=]\s*(.*?)(?:\n|notify|$)/i)
       const condition = conditionMatch ? conditionMatch[1].trim() : "changes significantly"
-      
+
       const notificationMethodMatch = text.match(/(?:notify via|notification method|send)[:=]\s*(.*?)(?:\n|$)/i)
       const notificationMethodText = notificationMethodMatch ? notificationMethodMatch[1].trim() : "email, push"
       const notificationMethod = notificationMethodText
-        .split(/[,\s]+/)
-        .filter(method => ["email", "sms", "push", "in-app"].includes(method.toLowerCase()))
-      
-      return {
+          .split(/[,\s]+/)
+          .filter(method => ["email", "sms", "push", "in-app"].includes(method.toLowerCase()))
+
+      const alertData = {
         type: "alert",
         text: text,
         alert: {
@@ -66,12 +71,16 @@ function parseResponse(text) {
           notificationMethod: notificationMethod.length ? notificationMethod : ["email", "push"]
         }
       }
+
+      console.log("Parsed alert data:", JSON.stringify(alertData, null, 2))
+      return alertData
     } catch (error) {
       console.error("Error parsing alert data:", error)
     }
   }
-  
+
   // Default to regular response
+  console.log("No structured data detected, returning standard response")
   return {
     response: text,
     status: "success"
@@ -79,29 +88,36 @@ function parseResponse(text) {
 }
 
 export async function POST(req: Request) {
+  console.log("Chatbot POST request received")
   try {
     if (!process.env.GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY not configured")
       return NextResponse.json(
-        { error: "Gemini API key is not configured" },
-        { status: 500 }
+          { error: "Gemini API key is not configured" },
+          { status: 500 }
       )
     }
-    
+
     const { message, pdfContext } = await req.json()
-    
+    console.log("Request data:", { message, hasPdfContext: !!pdfContext })
+
     if (!message) {
+      console.error("No message provided in request")
       return NextResponse.json(
-        { error: "Message is required" },
-        { status: 400 }
+          { error: "Message is required" },
+          { status: 400 }
       )
     }
 
     // Fetch portfolio data
     const token = req.headers.get("Authorization")?.replace("Bearer ", "")
+    console.log("Token present:", !!token)
+
     let portfolioData = { netWorth: 0, assets: [] }
-    
+
     if (token) {
       try {
+        console.log("Fetching portfolio data")
         const portfolioResponse = await fetch("http://localhost:5000/api/auth/finance", {
           method: "GET",
           headers: {
@@ -109,26 +125,34 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
           }
         })
-        
+
         if (portfolioResponse.ok) {
           portfolioData = await portfolioResponse.json()
+          console.log("Portfolio data fetched successfully:", JSON.stringify({
+            netWorth: portfolioData.netWorth,
+            assetsCount: portfolioData.assets?.length || 0
+          }, null, 2))
+        } else {
+          console.error("Failed to fetch portfolio data:", portfolioResponse.status)
         }
       } catch (error) {
         console.error("Error fetching portfolio data:", error)
       }
     }
-    
+
+    console.log("Initializing Gemini model")
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
-    
+
     const generationConfig = {
       temperature: 0.7,
       topK: 40,
       topP: 0.95,
       maxOutputTokens: 1024,
     }
-    
+
     let prompt = ""
     if (pdfContext) {
+      console.log("Using PDF context prompt")
       prompt = `You are a financial analyst assistant specializing in Jamaican finance.
       
       User's Portfolio:
@@ -158,6 +182,7 @@ export async function POST(req: Request) {
       
       Answer:`
     } else {
+      console.log("Using standard prompt")
       prompt = `You are DSFG's AI Financial Advisor specialized in Jamaican finance.
       
       User's Portfolio:
@@ -180,30 +205,34 @@ export async function POST(req: Request) {
       Question: ${message}
       Answer:`
     }
-    
+
+    console.log("Sending request to Gemini")
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig,
     })
-    
+
     const responseText = result.response.text()
-    
+    console.log("Received response from Gemini. Response length:", responseText.length)
+
     // Parse the response for structured data and return the appropriate format
     const parsedResponse = parseResponse(responseText)
-    
+    console.log("Response type:", parsedResponse.type || "standard")
+
     return NextResponse.json(parsedResponse)
   } catch (error) {
     console.error("Error in chat API:", error)
     return NextResponse.json(
-      {
-        error: "Failed to process chat request",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
+        {
+          error: "Failed to process chat request",
+          details: error instanceof Error ? error.message : "Unknown error",
+        },
+        { status: 500 }
     )
   }
 }
 
 export async function GET() {
+  console.log("Chatbot GET request received - health check")
   return NextResponse.json({ status: "API is running" }, { status: 200 })
 }
