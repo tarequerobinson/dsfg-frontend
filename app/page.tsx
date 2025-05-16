@@ -1,15 +1,28 @@
 "use client"
-
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowRight, BarChart2, Lock, DollarSign, BookOpen, TrendingUp, Calendar, PieChartIcon, NewspaperIcon, LucideVibrate } from "lucide-react"
 import { useTheme } from "@/contexts/ThemeContext"
 import DarkModeToggle from "@/components/DarkModeToggle"
 import { useState, useEffect } from "react"
 
+// Explicit image imports
+import DashboardFull from "../public/images/dashboard-full.png"
+import DashboardEmpty from "../public/images/dashboard-empty.png"
+import EventsPage from "../public/images/events-page.png"
+import FinancialAssistant from "../public/images/financial-assistant.png"
+import NewsSentiment from "../public/images/news-sentiment.png"
+import ProfilePage from "../public/images/profile-page.png"
+import RiskAssessment from "../public/images/risk-assessment.png"
+import CsvUpload from "../public/images/csv-upload.png"
+import Signin from "../public/images/signin.png"
+import Signup from "../public/images/signup.png"
+
 export default function LandingPage() {
   const { darkMode } = useTheme()
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isHydrated, setIsHydrated] = useState(false)
+  const [activeImage, setActiveImage] = useState("dashboard-full")
 
   useEffect(() => {
     setIsHydrated(true)
@@ -19,6 +32,42 @@ export default function LandingPage() {
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
+
+  // Define all screenshots with their metadata
+  const screenshots = [
+    { id: "dashboard-full", title: "Portfolio Dashboard", description: "Track your investments and financial goals in one view" },
+    { id: "dashboard-empty", title: "Getting Started", description: "Begin your financial journey with a clean slate" },
+    { id: "events-page", title: "Financial Events Calendar", description: "Stay informed about important financial dates and events" },
+    { id: "financial-assistant", title: "AI Financial Assistant", description: "Get personalized financial advice and insights" },
+    { id: "news-sentiment", title: "News & Market Sentiment", description: "Track market mood and latest financial news" },
+    { id: "profile-page", title: "User Profile", description: "Manage your personal information and preferences" },
+    { id: "risk-assessment", title: "Risk Assessment", description: "Understand your risk tolerance and investment strategy" },
+    { id: "csv-upload", title: "Data Import", description: "Easily upload your financial data via CSV" },
+    { id: "signin", title: "Secure Sign In", description: "Access your account with our secure authentication system" },
+    { id: "signup", title: "Quick Registration", description: "Join DSFG in minutes with our streamlined signup process" }
+  ]
+
+  // Map screenshot IDs to imported images
+  const imageMap = {
+    "dashboard-full": DashboardFull,
+    "dashboard-empty": DashboardEmpty,
+    "events-page": EventsPage,
+    "financial-assistant": FinancialAssistant,
+    "news-sentiment": NewsSentiment,
+    "profile-page": ProfilePage,
+    "risk-assessment": RiskAssessment,
+    "csv-upload": CsvUpload,
+    "signin": Signin,
+    "signup": Signup
+  }
+
+  // Developers list
+  const developers = [
+    { name: "Tarque Robinson", role: "Lead Developer", bio: "Expert in fintech solutions with 10+ years of experience" },
+    { name: "Sheamar Whyte", role: "UI/UX Designer", bio: "Crafting intuitive financial interfaces" },
+    { name: "Keneel Thomas", role: "Backend Engineer", bio: "Building secure and scalable systems" },
+    { name: "Von Harris", role: "Data Scientist", bio: "Powering insights with advanced analytics" }
+  ]
 
   if (!isHydrated) return null
 
@@ -55,7 +104,7 @@ export default function LandingPage() {
           }`}></div>
           <nav className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
             <div className="flex items-center">
-              <div className="bg-gradient-to-r from-emerald-400 to-blue-500 p-2 rounded-xl">
+              <div className="bg-gradient-to-r from from-emerald-400 to-blue-500 p-2 rounded-xl">
                 <DollarSign className="h-6 w-6 text-white" />
               </div>
               <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
@@ -82,7 +131,7 @@ export default function LandingPage() {
                 Sign In
               </Link>
               <Link 
-                href="/terms-and-condition" 
+                href="/signup" 
                 className="bg-gradient-to-r from-emerald-400 to-blue-500 text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
               >
                 Sign Up
@@ -92,37 +141,125 @@ export default function LandingPage() {
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          {/* Hero Section */}
           <div className="text-center">
             <h1 className={`text-4xl tracking-tight font-extrabold sm:text-5xl md:text-6xl ${
               darkMode ? 'text-zinc-50' : 'text-neutral-900'
             }`}>
-              <span className="block">What's Your Networth?</span>
+              <span className="block">Take Control of Your Financial Future</span>
               <span className="block bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent mt-2">
-                Find out today
+                With DSFG
               </span>
             </h1>
             <p className={`mt-6 max-w-md mx-auto text-base sm:text-lg md:mt-8 md:text-xl md:max-w-3xl ${
               darkMode ? 'text-zinc-400' : 'text-neutral-600'
             }`}>
-              DSFG - The Dollars and Sense Financial Group helps you to see where you stand financially in Jamaica and the world.
+              Discover your net worth and grow your wealth with DSFG - The Dollars and Sense Financial Group, your trusted partner in Jamaica and beyond.
             </p>
-            <div className="mt-8 max-w-md mx-auto sm:flex sm:justify-center md:mt-10">
+            <div className="mt-8 max-w-md mx-auto sm:flex sm:justify-center md:mt-10 gap-4">
               <Link
                 href="/signup"
                 className="group flex items-center justify-center px-8 py-4 text-lg font-medium rounded-xl text-white bg-gradient-to-r from-emerald-400 to-blue-500 hover:opacity-90 transition-opacity"
               >
-                Get started
+                Start Your Journey
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="#demo"
+                className="group flex items-center justify-center px-8 py-4 text-lg font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-emerald-400 hover:opacity-90 transition-opacity"
+              >
+                Watch Demo
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
           </div>
 
+{/* YouTube Demo Video */}
+          <div id="demo" className="mt-32">
+            <h2 className={`text-center text-3xl font-bold ${
+              darkMode ? 'text-zinc-50' : 'text-neutral-900'
+            }`}>
+              See DSFG in Action
+            </h2>
+            <p className={`mt-4 text-center max-w-3xl mx-auto ${
+              darkMode ? 'text-zinc-400' : 'text-neutral-600'
+            }`}>
+              Watch our platform demo to explore how DSFG empowers your financial decisions
+            </p>
+            <div className="mt-10 max-w-5xl mx-auto">
+              <div className="relative aspect-[16/9] rounded-xl overflow-hidden shadow-xl">
+                <iframe 
+                  width="1096" 
+                  height="531" 
+                  src="https://www.youtube.com/embed/MMEzw6k9UGo" 
+                  title="CAPSTONE SCREEN RECORDING" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  referrerPolicy="strict-origin-when-cross-origin" 
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          </div>
+
+          
+          {/* Platform Screenshots Showcase */}
           <div className="mt-32">
             <h2 className={`text-center text-3xl font-bold ${
               darkMode ? 'text-zinc-50' : 'text-neutral-900'
             }`}>
-              Key Features
+              Explore Our Cutting-Edge Platform
             </h2>
+            <p className={`mt-4 text-center max-w-3xl mx-auto ${
+              darkMode ? 'text-zinc-400' : 'text-neutral-600'
+            }`}>
+              Experience the power of DSFG's intuitive features designed to simplify and enhance your financial management
+            </p>
+            
+            {/* Screenshot Grid */}
+            <div className="mt-10 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {screenshots.map((screenshot) => (
+                <div key={screenshot.id} className="relative group">
+                  <div className={`relative rounded-xl overflow-hidden shadow-xl ${
+                    darkMode ? 'shadow-emerald-500/5' : 'shadow-emerald-500/10'
+                  } border ${
+                    darkMode ? 'border-zinc-800' : 'border-zinc-200'
+                  } aspect-[16/9]`}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-blue-500/10 z-10 pointer-events-none"></div>
+                    <Image 
+                      src={imageMap[screenshot.id]}
+                      alt={screenshot.title}
+                      layout="fill"
+                      objectFit="cover"
+                      className="transition-opacity duration-300 group-hover:scale-105"
+                      priority
+                    />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <h3 className={`text-lg font-semibold ${darkMode ? 'text-zinc-50' : 'text-neutral-900'}`}>
+                      {screenshot.title}
+                    </h3>
+                    <p className={`mt-2 text-sm ${darkMode ? 'text-zinc-400' : 'text-neutral-600'}`}>
+                      {screenshot.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Key Features */}
+          <div className="mt-32">
+            <h2 className={`text-center text-3xl font-bold ${
+              darkMode ? 'text-zinc-50' : 'text-neutral-900'
+            }`}>
+              Why Choose DSFG?
+            </h2>
+            <p className={`mt-4 text-center max-w-3xl mx-auto ${
+              darkMode ? 'text-zinc-400' : 'text-neutral-600'
+            }`}>
+              Unlock a suite of powerful tools to manage, track, and grow your wealth
+            </p>
             <div className="mt-16 grid gap-8 grid-cols-1 md:grid-cols-3">
               {[PortfolioManagement, RiskManagement, FinancialPlanning, NewsAggregator, BusinessCalendar, StockTickerAlerts].map((feature, idx) => (
                 <div key={idx} className="relative group">
@@ -145,6 +282,45 @@ export default function LandingPage() {
                     }`}>
                       {feature.description}
                     </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Meet the Team */}
+          <div className="mt-32">
+            <h2 className={`text-center text-3xl font-bold ${
+              darkMode ? 'text-zinc-50' : 'text-neutral-900'
+            }`}>
+              Meet Our Team
+            </h2>
+            <p className={`mt-4 text-center max-w-3xl mx-auto ${
+              darkMode ? 'text-zinc-400' : 'text-neutral-600'
+            }`}>
+              The passionate innovators behind DSFG, dedicated to your financial success
+            </p>
+            <div className="mt-16 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+              {developers.map((dev, idx) => (
+                <div key={idx} className="text-center">
+                  <div className={`relative rounded-xl p-6 ${
+                    darkMode ? 'bg-zinc-800/30' : 'bg-white/80'
+                  } border ${
+                    darkMode ? 'border-zinc-700/50' : 'border-zinc-200/50'
+                  } shadow-lg`}>
+                    <h3 className={`text-lg font-semibold ${
+                      darkMode ? 'text-zinc-50' : 'text-neutral-900'
+                    }`}>
+                      {dev.name}
+                    </h3>
+                    {/* <p className={`text-sm font-medium bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent`}>
+                      {dev.role}
+                    </p> */}
+                    {/* <p className={`mt-2 text-sm ${
+                      darkMode ? 'text-zinc-400' : 'text-neutral-600'
+                    }`}>
+                      {dev.bio}
+                    </p> */}
                   </div>
                 </div>
               ))}
@@ -186,19 +362,16 @@ const FinancialPlanning = {
   description: "Get personalized recommendations to achieve your financial goals."
 }
 
-
-
-
 const BusinessCalendar = {
   icon: Calendar,
   title: "Business Calendar",
-  description: "Consolidate and monitor all your assets in one place."
+  description: "Track important financial events and deadlines."
 }
 
 const StockTickerAlerts = {
   icon: LucideVibrate,
   title: "Stock Ticker Alerts",
-  description: "Create Email, Telegram and SMS alerts for select stock price changes"
+  description: "Create Email, Telegram and SMS alerts for select stock price changes."
 }
 
 const NewsAggregator = {
