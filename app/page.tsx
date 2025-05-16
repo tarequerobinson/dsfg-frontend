@@ -6,23 +6,14 @@ import { useTheme } from "@/contexts/ThemeContext"
 import DarkModeToggle from "@/components/DarkModeToggle"
 import { useState, useEffect } from "react"
 
-// Explicit image imports
-import DashboardFull from "../public/images/dashboard-full.png"
-import DashboardEmpty from "../public/images/dashboard-empty.png"
-import EventsPage from "../public/images/events-page.png"
-import FinancialAssistant from "../public/images/financial-assistant.png"
-import NewsSentiment from "../public/images/news-sentiment.png"
-import ProfilePage from "../public/images/profile-page.png"
-import RiskAssessment from "../public/images/risk-assessment.png"
-import CsvUpload from "../public/images/csv-upload.png"
-import Signin from "../public/images/signin.png"
-import Signup from "../public/images/signup.png"
-
 export default function LandingPage() {
   const { darkMode } = useTheme()
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isHydrated, setIsHydrated] = useState(false)
   const [activeImage, setActiveImage] = useState("dashboard-full")
+  
+  // Move carousel state and effect to the top, before any early returns
+  const [currentSlide, setCurrentSlide] = useState(0)
 
   useEffect(() => {
     setIsHydrated(true)
@@ -33,37 +24,10 @@ export default function LandingPage() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
-  // Define all screenshots with their metadata
-  const screenshots = [
-    { id: "dashboard-full", title: "Portfolio Dashboard", description: "Track your investments and financial goals in one view" },
-    { id: "dashboard-empty", title: "Getting Started", description: "Begin your financial journey with a clean slate" },
-    { id: "events-page", title: "Financial Events Calendar", description: "Stay informed about important financial dates and events" },
-    { id: "financial-assistant", title: "AI Financial Assistant", description: "Get personalized financial advice and insights" },
-    { id: "news-sentiment", title: "News & Market Sentiment", description: "Track market mood and latest financial news" },
-    { id: "profile-page", title: "User Profile", description: "Manage your personal information and preferences" },
-    { id: "risk-assessment", title: "Risk Assessment", description: "Understand your risk tolerance and investment strategy" },
-    { id: "csv-upload", title: "Data Import", description: "Easily upload your financial data via CSV" },
-    { id: "signin", title: "Secure Sign In", description: "Access your account with our secure authentication system" },
-    { id: "signup", title: "Quick Registration", description: "Join DSFG in minutes with our streamlined signup process" }
-  ]
-
-  // Map screenshot IDs to imported images
-  const imageMap = {
-    "dashboard-full": DashboardFull,
-    "dashboard-empty": DashboardEmpty,
-    "events-page": EventsPage,
-    "financial-assistant": FinancialAssistant,
-    "news-sentiment": NewsSentiment,
-    "profile-page": ProfilePage,
-    "risk-assessment": RiskAssessment,
-    "csv-upload": CsvUpload,
-    "signin": Signin,
-    "signup": Signup
-  }
 
   // Developers list
   const developers = [
-    { name: "Tarque Robinson", role: "Lead Developer", bio: "Expert in fintech solutions with 10+ years of experience" },
+    { name: "Tarque Robinson", role: "Lead Developer", bio: "Tech strategist leveraging business acumen" },
     { name: "Sheamar Whyte", role: "UI/UX Designer", bio: "Crafting intuitive financial interfaces" },
     { name: "Keneel Thomas", role: "Backend Engineer", bio: "Building secure and scalable systems" },
     { name: "Von Harris", role: "Data Scientist", bio: "Powering insights with advanced analytics" }
@@ -174,7 +138,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-{/* YouTube Demo Video */}
+          {/* YouTube Demo Video */}
           <div id="demo" className="mt-32">
             <h2 className={`text-center text-3xl font-bold ${
               darkMode ? 'text-zinc-50' : 'text-neutral-900'
@@ -202,51 +166,6 @@ export default function LandingPage() {
             </div>
           </div>
 
-          
-          {/* Platform Screenshots Showcase */}
-          <div className="mt-32">
-            <h2 className={`text-center text-3xl font-bold ${
-              darkMode ? 'text-zinc-50' : 'text-neutral-900'
-            }`}>
-              Explore Our Cutting-Edge Platform
-            </h2>
-            <p className={`mt-4 text-center max-w-3xl mx-auto ${
-              darkMode ? 'text-zinc-400' : 'text-neutral-600'
-            }`}>
-              Experience the power of DSFG's intuitive features designed to simplify and enhance your financial management
-            </p>
-            
-            {/* Screenshot Grid */}
-            <div className="mt-10 grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {screenshots.map((screenshot) => (
-                <div key={screenshot.id} className="relative group">
-                  <div className={`relative rounded-xl overflow-hidden shadow-xl ${
-                    darkMode ? 'shadow-emerald-500/5' : 'shadow-emerald-500/10'
-                  } border ${
-                    darkMode ? 'border-zinc-800' : 'border-zinc-200'
-                  } aspect-[16/9]`}>
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-blue-500/10 z-10 pointer-events-none"></div>
-                    <Image 
-                      src={imageMap[screenshot.id]}
-                      alt={screenshot.title}
-                      layout="fill"
-                      objectFit="cover"
-                      className="transition-opacity duration-300 group-hover:scale-105"
-                      priority
-                    />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <h3 className={`text-lg font-semibold ${darkMode ? 'text-zinc-50' : 'text-neutral-900'}`}>
-                      {screenshot.title}
-                    </h3>
-                    <p className={`mt-2 text-sm ${darkMode ? 'text-zinc-400' : 'text-neutral-600'}`}>
-                      {screenshot.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Key Features */}
           <div className="mt-32">
@@ -261,7 +180,7 @@ export default function LandingPage() {
               Unlock a suite of powerful tools to manage, track, and grow your wealth
             </p>
             <div className="mt-16 grid gap-8 grid-cols-1 md:grid-cols-3">
-              {[PortfolioManagement, RiskManagement, FinancialPlanning, NewsAggregator, BusinessCalendar, StockTickerAlerts].map((feature, idx) => (
+              {[PortfolioManagement, RiskManagement, FinancialPlanning, NewsAggregator, BusinessCalendar].map((feature, idx) => (
                 <div key={idx} className="relative group">
                   <div className={`absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 ${
                     darkMode ? 'opacity-[0.03]' : 'opacity-5'
@@ -313,14 +232,15 @@ export default function LandingPage() {
                     }`}>
                       {dev.name}
                     </h3>
-                    {/* <p className={`text-sm font-medium bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent`}>
+                    {/* Uncomment if you want to include role and bio */}
+                    <p className={`text-sm font-medium bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent`}>
                       {dev.role}
-                    </p> */}
-                    {/* <p className={`mt-2 text-sm ${
+                    </p>
+                    <p className={`mt-2 text-sm ${
                       darkMode ? 'text-zinc-400' : 'text-neutral-600'
                     }`}>
                       {dev.bio}
-                    </p> */}
+                    </p>
                   </div>
                 </div>
               ))}
